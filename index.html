@@ -189,7 +189,7 @@ a.tiroir-item { text-decoration: none; }
   <div class="haut">
     <div class="fruits" aria-hidden="true">🥕🍅🥖🍋🧀</div>
     <h1>Courses</h1>
-    <div class="sous">Ta liste, sur le téléphone et le PC</div>
+    <div class="sous">La liste de courses, sans compte</div>
   </div>
   <div class="corps">
     <label>E-mail<input id="email" type="email" autocomplete="username" required></label>
@@ -215,7 +215,7 @@ a.tiroir-item { text-decoration: none; }
   <button class="tiroir-item" id="aller-sauvegarde" type="button"><span class="ic">💾</span>Sauvegarde</button>
   <a class="tiroir-item" id="aller-aide" href="aide.html" target="_blank" rel="noopener"><span class="ic">❓</span>Aide</a>
   <div class="tiroir-pied">Ma Liste — JLApplis<br><small>tirée de Courses <span id="version"></span>, licence GPL v3</small><br><button class="deco" id="deco" type="button" hidden>Se déconnecter</button>
-    <div class="deco-confirme" id="deco-confirme" hidden><span>Se déconnecter ? Pour te reconnecter, il faudra du réseau.</span><span class="deco-btns"><button class="non" id="deco-non" type="button">Annuler</button><button class="oui" id="deco-oui" type="button">Se déconnecter</button></span></div></div>
+    <div class="deco-confirme" id="deco-confirme" hidden><span>Se déconnecter ?</span><span class="deco-btns"><button class="non" id="deco-non" type="button">Annuler</button><button class="oui" id="deco-oui" type="button">Se déconnecter</button></span></div></div>
 </nav>
 
 <div class="page">
@@ -235,14 +235,14 @@ a.tiroir-item { text-decoration: none; }
   <section id="vue-liste" hidden>
   <div class="fiche">
     <ul id="liste" aria-label="Articles à acheter"></ul>
-    <div id="vide" class="vide" hidden>La liste est vide. Ajoute un article ci-dessous.</div>
+    <div id="vide" class="vide" hidden>La liste est vide. Ajouter un article ci-dessous.</div>
     <form class="ajout" id="form-ajout" autocomplete="off">
       <span class="plus" aria-hidden="true">+</span>
       <input id="nouveau" type="text" placeholder="Ajouter un article ou coller une liste" aria-label="Ajouter un article" enterkeyhint="done">
     </form>
     <div class="sugg" id="sugg" aria-label="Suggestions"></div>
-    <div class="astuce">Astuce : touche Entrée sur un article pour en ajouter un juste dessous.</div>
-    <div class="outils-ajout"><button class="lien" id="ajout-titre" type="button" title="Ajoute un titre de magasin en fin de liste (le texte tapé ci-dessus devient son nom)">🏪 Ajouter un magasin</button></div>
+    <div class="astuce">Astuce : appuyer sur Entrée sur un article pour en ajouter un juste dessous.</div>
+    <div class="outils-ajout"><button class="lien" id="ajout-titre" type="button" title="Ajouter un titre de magasin en fin de liste (le texte tapé ci-dessus devient son nom)">🏪 Ajouter un magasin</button></div>
   </div>
 
   <button class="bascule" id="bascule" type="button" aria-expanded="false" hidden>
@@ -264,7 +264,7 @@ a.tiroir-item { text-decoration: none; }
   <section id="vue-note" hidden>
     <div class="note-edit" id="note-edit">
       <input id="note-titre" class="note-titre" type="text" placeholder="Titre" autocomplete="off" aria-label="Titre de la note">
-      <textarea id="note-texte" class="note-texte" placeholder="Écris ta note…" aria-label="Texte de la note"></textarea>
+      <textarea id="note-texte" class="note-texte" placeholder="Écrire une note…" aria-label="Texte de la note"></textarea>
       <div class="note-bas">
         <div class="couleurs" id="couleurs" aria-label="Couleur de la note"></div>
         <span class="note-etat" id="note-etat"></span>
@@ -275,9 +275,9 @@ a.tiroir-item { text-decoration: none; }
   </section>
 
   <section id="vue-sauvegarde" hidden>
-    <div class="bloc-s"><h3>Contenu</h3><p class="note"><b>Tes listes sont enregistrées uniquement dans ce navigateur, sur cet appareil.</b> Si les données du navigateur sont effacées, elles sont perdues : sauvegarde régulièrement. Une sauvegarde permet aussi de passer sur un autre appareil (↩️ Restaurer).</p><p id="sauv-contenu"></p><p class="note">Dernière sauvegarde depuis cet appareil : <b id="sauv-derniere"></b></p></div>
+    <div class="bloc-s"><h3>Contenu</h3><p class="note"><b>Les listes sont enregistrées uniquement dans ce navigateur, sur cet appareil.</b> Si les données du navigateur sont effacées, elles sont perdues : sauvegarder régulièrement. Une sauvegarde permet aussi de passer sur un autre appareil (↩️ Restaurer).</p><p id="sauv-contenu"></p><p class="note">Dernière sauvegarde depuis cet appareil : <b id="sauv-derniere"></b></p></div>
     <div class="bloc-s"><h3>💾 Sauvegarder</h3>
-      <p class="note">Crée un fichier JSON daté avec toutes tes listes, leurs articles, les suggestions, les notes et les archives. </p>
+      <p class="note">Crée un fichier JSON daté avec toutes les listes, leurs articles, les suggestions, les notes et les archives. </p>
       <p class="note">Dossier de sauvegarde : <b id="fs-nom">…</b></p>
       <div class="btns"><button class="pop-ok" id="sauv-go" type="button">💾 Sauvegarder maintenant</button><button class="lien" id="fs-choisir" type="button" hidden>📁 Choisir le dossier…</button><button class="lien rouge" id="fs-oublier" type="button" hidden>Retirer le dossier</button></div>
       <p class="note" id="fs-aide"></p>
@@ -433,18 +433,18 @@ const colArticles = () => colArticlesDe(G);
 const refArticle = (id) => doc(colArticlesDe(G), id);
 const refHisto = () => refHistoDe(G);
 function etat(msg, alerte) { const e = $("etat"); e.textContent = msg || ""; e.classList.toggle("alerte", !!alerte); }
-function erreur(e) { console.error(e); etat("Enregistrement impossible, réessaie", true); }
+function erreur(e) { console.error(e); etat("Enregistrement impossible, réessayer", true); }
 
 /* ---------- connexion ---------- */
 $("ecran-connexion").addEventListener("submit", (e) => {
   e.preventDefault(); const m = $("msg-connexion"); m.className = "msg"; m.textContent = "Connexion…";
   signInWithEmailAndPassword(auth, $("email").value.trim(), $("mdp").value)
     .then(() => { m.textContent = ""; })
-    .catch((err) => { m.textContent = (!navigator.onLine || err.code === "auth/network-request-failed") ? "Pas de réseau : la connexion a besoin d'internet. Réessaie dès que le réseau revient." : /invalid-credential|wrong-password|user-not-found|invalid-email/.test(err.code) ? "E-mail ou mot de passe incorrect." : "Connexion impossible (" + err.code + ")."; });
+    .catch((err) => { m.textContent = (!navigator.onLine || err.code === "auth/network-request-failed") ? "Pas de réseau : la connexion a besoin d'internet. Réessayer dès que le réseau revient." : /invalid-credential|wrong-password|user-not-found|invalid-email/.test(err.code) ? "E-mail ou mot de passe incorrect." : "Connexion impossible (" + err.code + ")."; });
 });
 $("oubli").addEventListener("click", () => {
   const m = $("msg-connexion"), mail = $("email").value.trim();
-  if (!mail) { m.className = "msg"; m.textContent = "Indique d'abord ton e-mail."; return; }
+  if (!mail) { m.className = "msg"; m.textContent = "Indiquer d'abord l'e-mail."; return; }
   sendPasswordResetEmail(auth, mail).then(() => { m.className = "msg ok"; m.textContent = "E-mail de réinitialisation envoyé."; })
     .catch((err) => { m.className = "msg"; m.textContent = "Envoi impossible (" + err.code + ")."; });
 });
@@ -968,7 +968,7 @@ function rendreSauvegarde() {
   const m = nbModifs();
   $("sauv-derniere").textContent = (d ? new Date(d).toLocaleString("fr-FR") : "jamais") + (m ? " — " + pl(m, "modification") + " depuis" : "");
   $("fs-choisir").hidden = !fsDispo();
-  $("fs-aide").textContent = fsDispo() ? "Choisis une fois le dossier (par exemple « COURSES JSON ») : chaque sauvegarde y sera enregistrée directement. Le navigateur peut redemander l'autorisation : accepte." : "Ce navigateur ne permet pas de choisir un dossier : la sauvegarde va dans « Téléchargements ».";
+  $("fs-aide").textContent = fsDispo() ? "Choisir une fois le dossier (par exemple un dossier « Ma Liste » dans Documents) : chaque sauvegarde y sera enregistrée directement. Le navigateur peut redemander l'autorisation : l'accepter." : "Ce navigateur ne permet pas de choisir un dossier : la sauvegarde va dans « Téléchargements ».";
   fsGet().then((h) => { $("fs-nom").textContent = h ? "« " + h.name + " »" : "aucun (le fichier va dans « Téléchargements »)"; $("fs-oublier").hidden = !h; });
 }
 let SAUV_EN_COURS = false;
@@ -1059,7 +1059,7 @@ $("rest-oui").addEventListener("click", async () => {
     fixerModifs(0);   // les données sont maintenant celles du fichier
     msgSauv("Sauvegarde restaurée : " + compter(o) + ". L'état d'avant est dans " + avant.nom + " (" + avant.ou + ").");
     rendreSauvegarde(); rendreTiroir();
-  } catch (e) { msgSauv("Restauration interrompue : " + e.message + ". Si une partie a été remplacée, restaure le fichier « MA-LISTE_avant_restauration_… ».", true); }
+  } catch (e) { msgSauv("Restauration interrompue : " + e.message + ". Si une partie a été remplacée, restaurer le fichier « MA-LISTE_avant_restauration_… ».", true); }
   btn.disabled = false;
 });
 
