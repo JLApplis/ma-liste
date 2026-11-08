@@ -36,7 +36,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.4 var(--
 header { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 16px 18px; border-radius: 18px; background: var(--leaf); color: #fff; box-shadow: 0 6px 18px rgba(46,125,79,.25); }
 h1 { margin: 0; font: 600 30px/1 var(--display); letter-spacing: .3px; flex: 1; }
 .deco-fruits { font-size: 22px; letter-spacing: 2px; }
-.etat { font-size: 12px; font-weight: 600; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
+.etat { font-size: 12px; font-weight: 600; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 12px; white-space: nowrap; min-width: 0; max-width: 42vw; overflow: hidden; text-overflow: ellipsis; }
 .etat.alerte { background: var(--tomato); }
 /* fiche de la liste */
 .fiche { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 6px 14px 10px; box-shadow: 0 2px 10px rgba(80,60,20,.06); }
@@ -301,7 +301,7 @@ a.tiroir-item { text-decoration: none; }
 <div class="toast" id="toast" role="status" hidden></div>
 <script type="module">
 /*
-    Ma Liste — liste de courses sans compte (JLApplis), tirée de Courses 1.15
+    Ma Liste — liste de courses sans compte (JLApplis), tirée de Courses 1.16
     Les données restent dans le navigateur de l'appareil (localStorage) : pas de compte, pas de Firebase, rien n'est envoyé.
     Fichiers à côté : manifest.webmanifest, sw.js, icon-192.png, icon-512.png, aide.html
     Copyright (C) 2026 Jluc — JLApplis — Licence GPL v3 (voir LICENSE)
@@ -396,7 +396,7 @@ const { initializeApp, getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
   };
 })();
 
-const VERSION = "1.15";
+const VERSION = "1.16";
 
 /* chaque écriture compte comme une modification non sauvegardée (sur cet appareil) */
 const KEY_MODIFS = "ma-liste_modifs";
@@ -525,7 +525,8 @@ function ouvrirListe(gid) {
   desabListe.forEach((f) => f()); desabListe = []; fermerInsertion();
   G = g; ARTS = []; HISTO = {}; $("nouveau").value = ""; rendre();
   etat("Chargement…");
-  const minuteur = setTimeout(() => etat("Hors ligne — les changements seront envoyés au retour du réseau", true), 10000);
+  const minuteur = setTimeout(() => etat("Hors ligne — envoi au retour du réseau", true), 10000);
+  desabListe.push(() => clearTimeout(minuteur));   // annulé si on quitte ou recharge la liste avant la première réponse
   desabListe.push(onSnapshot(colArticles(), { includeMetadataChanges: true }, (snap) => {
     ARTS = snap.docs.map((d) => { const x = d.data(); return { id: d.id, texte: String(x.texte || ""), coche: !!x.coche, ordre: x.ordre || 0, cocheLe: x.cocheLe || 0, titre: x.type === "titre" }; });
     if (!snap.metadata.fromCache) { clearTimeout(minuteur); etat(snap.metadata.hasPendingWrites ? "Enregistrement…" : "À jour"); }
