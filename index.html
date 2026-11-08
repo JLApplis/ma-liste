@@ -56,11 +56,15 @@ li.coche .txt { color: var(--muted); font-weight: 400; text-decoration: line-thr
 #nouveau { flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 2px solid var(--line); color: var(--fg); font: inherit; padding: 10px 0; }
 #nouveau::placeholder { color: var(--muted); }
 #nouveau:focus { outline: none; border-bottom-color: var(--leaf); }
-.sugg { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 6px 38px; }
+.sugg { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 0 4px 38px; }
+li.sugg-ligne { list-style: none; padding: 2px 0 0; border: none; }
+li.sugg-ligne .sugg { padding-left: 30px; }
 .sugg:empty { display: none; }
 .sugg button { border: 1px solid #CFE5D3; background: var(--leaf-soft); color: #1F5C39; font: 600 15px var(--font); padding: 7px 13px; border-radius: 18px; cursor: pointer; }
 .sugg button:hover, .sugg button:focus-visible { background: var(--leaf); color: #fff; border-color: var(--leaf); outline: none; }
-.sugg button small { color: var(--tomato); font-weight: 600; margin-left: 5px; }
+.sugg button small { color: var(--leaf); font-weight: 700; margin-left: 6px; }
+.migration { background: var(--leaf-soft); border: 1px solid #CFE5D3; border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; font-size: 15px; }
+.migration .btns { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; align-items: center; }
 .sugg button:hover small, .sugg button:focus-visible small { color: #FFE2D8; }
 .poignee { flex: none; width: 30px; color: #B5AC97; font-size: 22px; line-height: 1; cursor: grab; touch-action: none; user-select: none; text-align: center; padding: 10px 0; }
 .poignee:hover { color: var(--leaf); }
@@ -214,7 +218,7 @@ a.tiroir-item { text-decoration: none; }
   <button class="tiroir-item" id="aller-archives" type="button"><span class="ic">🗄️</span>Archives<span class="compte" id="nb-archives"></span></button>
   <button class="tiroir-item" id="aller-sauvegarde" type="button"><span class="ic">💾</span>Sauvegarde</button>
   <a class="tiroir-item" id="aller-aide" href="aide.html" target="_blank" rel="noopener"><span class="ic">❓</span>Aide</a>
-  <div class="tiroir-pied">Ma Liste — JLApplis<br><small>tirée de Courses <span id="version"></span>, licence GPL v3</small><br><button class="deco" id="deco" type="button" hidden>Se déconnecter</button>
+  <div class="tiroir-pied">Ma Liste <span id="version"></span> — JLApplis<br><small>tirée de Courses 1.17, licence GPL v3</small><br><button class="deco" id="deco" type="button" hidden>Se déconnecter</button>
     <div class="deco-confirme" id="deco-confirme" hidden><span>Se déconnecter ?</span><span class="deco-btns"><button class="non" id="deco-non" type="button">Annuler</button><button class="oui" id="deco-oui" type="button">Se déconnecter</button></span></div></div>
 </nav>
 
@@ -234,13 +238,17 @@ a.tiroir-item { text-decoration: none; }
 
   <section id="vue-liste" hidden>
   <div class="fiche">
+    <div class="migration" id="migration" hidden>
+      <span id="migration-txt"></span>
+      <div class="btns"><button class="pop-ok" id="migration-oui" type="button">💾 Sauvegarder puis ajouter</button><button class="lien" id="migration-non" type="button">Non merci</button></div>
+    </div>
     <ul id="liste" aria-label="Articles à acheter"></ul>
     <div id="vide" class="vide" hidden>La liste est vide. Ajouter un article ci-dessous.</div>
+    <div class="sugg" id="sugg" aria-label="Suggestions"></div>
     <form class="ajout" id="form-ajout" autocomplete="off">
       <span class="plus" aria-hidden="true">+</span>
       <input id="nouveau" type="text" placeholder="Ajouter un article ou coller une liste" aria-label="Ajouter un article" enterkeyhint="done">
     </form>
-    <div class="sugg" id="sugg" aria-label="Suggestions"></div>
     <div class="astuce">Astuce : appuyer sur Entrée sur un article pour en ajouter un juste dessous.</div>
     <div class="outils-ajout"><button class="lien" id="ajout-titre" type="button" title="Ajouter un titre de magasin en fin de liste (le texte tapé ci-dessus devient son nom)">🏪 Ajouter un magasin</button></div>
   </div>
@@ -301,7 +309,7 @@ a.tiroir-item { text-decoration: none; }
 <div class="toast" id="toast" role="status" hidden></div>
 <script type="module">
 /*
-    Ma Liste — liste de courses sans compte (JLApplis), tirée de Courses 1.16
+    Ma Liste 1.0 — liste de courses sans compte (JLApplis), tirée de Courses 1.17
     Les données restent dans le navigateur de l'appareil (localStorage) : pas de compte, pas de Firebase, rien n'est envoyé.
     Fichiers à côté : manifest.webmanifest, sw.js, icon-192.png, icon-512.png, aide.html
     Copyright (C) 2026 Jluc — JLApplis — Licence GPL v3 (voir LICENSE)
@@ -396,7 +404,7 @@ const { initializeApp, getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
   };
 })();
 
-const VERSION = "1.16";
+const VERSION = "1.0";   // version de Ma Liste (tirée de Courses 1.17)
 
 /* chaque écriture compte comme une modification non sauvegardée (sur cet appareil) */
 const KEY_MODIFS = "ma-liste_modifs";
@@ -417,6 +425,7 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, { localCache: persistentLocalCache() });
 
 const $ = (id) => document.getElementById(id);
+let ARTS_SERVEUR = false, HISTO_CHARGE = false;
 let UID = null, ARTS = [], HISTO = {}, ouvert = false, desabonner = [], glisse = null, aRendre = false;
 let GROUPES = [], G = null, VUE = null, desabListe = [], groupesCharges = false;
 try { ouvert = localStorage.getItem("ma-liste_coches_ouvert") === "1"; } catch (e) { /* sans gravité */ }
@@ -461,7 +470,8 @@ onAuthStateChanged(auth, (u) => {
   etat("Chargement…");
   desabonner.push(onSnapshot(colGroupes(), (snap) => {
     GROUPES = snap.docs.map((d) => { const x = d.data(); return { id: d.id, nom: String(x.nom || ""), type: x.type === "note" ? "note" : "liste", archive: !!x.archive,
-      ordre: x.ordre || 0, legacy: !!x.legacy, texte: String(x.texte || ""), couleur: x.couleur || "", modifieLe: x.modifieLe || 0 }; });
+      ordre: x.ordre || 0, legacy: !!x.legacy, texte: String(x.texte || ""), couleur: x.couleur || "", modifieLe: x.modifieLe || 0, cochesHistorique: !!x.cochesHistorique }; });
+    proposerMigration();
     if (!snap.metadata.fromCache && !GROUPES.some((g) => g.id === "courses")) {
       // première ouverture : la liste existante devient « Liste de courses »
       setDoc(refGroupe("courses"), { nom: "Liste de courses", type: "liste", legacy: true, archive: false, ordre: 0, modifieLe: Date.now() }, { merge: true }).catch(erreur);
@@ -523,19 +533,20 @@ function ouvrirListe(gid) {
   const g = groupe(gid); if (!g) return;
   if (G && G.id === gid && desabListe.length) { G = g; return; }
   desabListe.forEach((f) => f()); desabListe = []; fermerInsertion();
-  G = g; ARTS = []; HISTO = {}; $("nouveau").value = ""; rendre();
+  G = g; ARTS = []; HISTO = {}; ARTS_SERVEUR = false; HISTO_CHARGE = false; $("nouveau").value = ""; rendre();
   etat("Chargement…");
   const minuteur = setTimeout(() => etat("Hors ligne — envoi au retour du réseau", true), 10000);
   desabListe.push(() => clearTimeout(minuteur));   // annulé si on quitte ou recharge la liste avant la première réponse
   desabListe.push(onSnapshot(colArticles(), { includeMetadataChanges: true }, (snap) => {
     ARTS = snap.docs.map((d) => { const x = d.data(); return { id: d.id, texte: String(x.texte || ""), coche: !!x.coche, ordre: x.ordre || 0, cocheLe: x.cocheLe || 0, titre: x.type === "titre" }; });
-    if (!snap.metadata.fromCache) { clearTimeout(minuteur); etat(snap.metadata.hasPendingWrites ? "Enregistrement…" : "À jour"); }
+    if (!snap.metadata.fromCache) { clearTimeout(minuteur); ARTS_SERVEUR = true; etat(snap.metadata.hasPendingWrites ? "Enregistrement…" : "À jour"); }
     if (!glisse) rendre(); else aRendre = true;
   }, (err) => { clearTimeout(minuteur); etat("Liste injoignable (" + err.code + ")", true); }));
   desabListe.push(onSnapshot(refHisto(), (s) => {
     const t = s.exists() ? (s.data().termes || {}) : {}; HISTO = {};
     Object.keys(t).forEach((k) => { if (t[k] && t[k].t) HISTO[k] = { t: String(t[k].t), n: Number(t[k].n) || 1 }; });
-    suggerer();
+    if (!s.metadata || !s.metadata.fromCache) HISTO_CHARGE = true;
+    suggerer(); proposerMigration();
   }, () => { /* suggestions indisponibles : la liste fonctionne quand même */ }));
 }
 function creerGroupe(type) {
@@ -711,22 +722,62 @@ function rendre() {
   suggerer();
 }
 
-/* ---------- suggestions : articles déjà achetés, les plus fréquents d'abord ---------- */
-function suggerer() {
-  const q = norm($("nouveau").value), deja = {};
-  ARTS.forEach((a) => { if (!a.coche && !a.titre) deja[cle(a.texte)] = 1; });
-  const l = Object.keys(HISTO).map((k) => ({ k, t: HISTO[k].t, n: HISTO[k].n || 1 }))
-    .filter((h) => !deja[h.k] && q && norm(h.t).indexOf(q) >= 0 && norm(h.t) !== q)
+/* ---------- suggestions façon Google Keep : à partir de la 2e lettre, 2 éléments cochés au plus ---------- */
+const SUGG_MAX = 2, SUGG_LETTRES = 2;
+function candidats(saisie) {
+  const q = norm(saisie); if (q.length < SUGG_LETTRES) return [];
+  const n = (a) => (HISTO[cle(a.texte)] && HISTO[cle(a.texte)].n) || 1;
+  return ARTS.filter((a) => a.coche && !a.titre && norm(a.texte).indexOf(q) >= 0)
     .sort((a, b) => {
-      const pa = norm(a.t).indexOf(q) === 0 ? 0 : 1, pb = norm(b.t).indexOf(q) === 0 ? 0 : 1;
-      return pa - pb || b.n - a.n || (norm(a.t) < norm(b.t) ? -1 : 1);
-    }).slice(0, 8);
-  $("sugg").replaceChildren(...l.map((h) => {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = h.t; b.title = "Acheté " + h.n + " fois";
-    const s = document.createElement("small"); s.textContent = "×" + h.n; b.appendChild(s);
-    b.addEventListener("click", () => ajouter(h.t)); return b;
+      const pa = norm(a.texte).indexOf(q) === 0 ? 0 : 1, pb = norm(b.texte).indexOf(q) === 0 ? 0 : 1;
+      return pa - pb || n(b) - n(a) || b.cocheLe - a.cocheLe;
+    }).slice(0, SUGG_MAX);
+}
+function boutonsSugg(conteneur, saisie, choisir) {
+  conteneur.replaceChildren(...candidats(saisie).map((a) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = a.texte; b.title = "Remettre « " + a.texte + " » à acheter";
+    const sm = document.createElement("small"); sm.textContent = "✓"; b.appendChild(sm);
+    b.addEventListener("pointerdown", (e) => e.preventDefault());   // le champ garde le focus (pas de validation au départ du champ)
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", () => choisir(a.texte)); return b;
   }));
 }
+function suggerer() {
+  boutonsSugg($("sugg"), $("nouveau").value, (t) => ajouter(t));
+  const ti = $("insert-txt"), l = $("insert-sugg");
+  if (ti && l) boutonsSugg(l.firstChild, ti.value, (t) => { ti.value = t; validerInsertion(false); });
+}
+
+/* ---------- une seule fois : les produits de l'historique deviennent des éléments cochés (comme dans Keep) ---------- */
+const PROPOSER_MIGRATION = false;
+function aMigrer() {
+  if (!PROPOSER_MIGRATION || !G || G.cochesHistorique || !ARTS_SERVEUR || !HISTO_CHARGE) return [];
+  const la = {}; ARTS.forEach((a) => { if (!a.titre) la[cle(a.texte)] = 1; });
+  return Object.keys(HISTO).filter((k) => !la[k]).map((k) => ({ k, t: HISTO[k].t }));
+}
+function proposerMigration() {
+  const l = aMigrer(), m = $("migration"); if (!m) return;
+  m.hidden = !l.length;
+  if (l.length) $("migration-txt").textContent = "Comme dans Google Keep, les suggestions viennent maintenant des éléments cochés. Ajouter " + l.length + " produit" + (l.length > 1 ? "s" : "") + " déjà acheté" + (l.length > 1 ? "s" : "") + " (historique) aux éléments cochés de « " + G.nom + " », pour qu'ils soient proposés pendant la saisie ?";
+}
+$("migration-non").addEventListener("click", () => { if (!G) return; G.cochesHistorique = true; $("migration").hidden = true; updateDoc(refGroupe(G.id), { cochesHistorique: true }).catch(erreur); });
+$("migration-oui").addEventListener("click", async () => {
+  const l = aMigrer(); if (!l.length || !G) return;
+  const g = G, b0 = $("migration-oui"); b0.disabled = true;
+  await sauvegarderMaintenant(toast);
+  if (!$("toast").textContent.startsWith("Sauvegarde enregistrée")) { b0.disabled = false; return; }   // pas de sauvegarde : on n'ajoute rien
+  try {
+    const base = Date.now();
+    for (let i = 0; i < l.length; i += 400) {
+      const lot = writeBatch(db);
+      // identifiant tiré du nom : si deux appareils le font en même temps, pas de doublon
+      l.slice(i, i + 400).forEach((x, j) => lot.set(doc(colArticlesDe(g), "h-" + x.k), { texte: x.t, coche: true, cocheLe: 1, ordre: base + i + j }));
+      await lot.commit();
+    }
+    g.cochesHistorique = true; await updateDoc(refGroupe(g.id), { cochesHistorique: true });
+    $("migration").hidden = true; toast(l.length + " produits ajoutés aux éléments cochés.");
+  } catch (e) { toast("Ajout interrompu : " + ((e && e.message) || e) + ". Réessayer plus tard.", true); b0.disabled = false; }
+});
 
 /* ---------- écritures ---------- */
 function memoriser(texte) {
@@ -739,7 +790,7 @@ function ajouter(texte, ordre, depuisInsertion) {
   if (!depuisInsertion) { $("nouveau").value = ""; suggerer(); $("nouveau").focus(); }
   const exist = ARTS.find((a) => !a.titre && cle(a.texte) === cle(texte));
   // déjà dans la liste cochée : on le remet à acheter au lieu de créer un doublon
-  const p = exist ? (exist.coche ? updateDoc(refArticle(exist.id), { coche: false }) : Promise.resolve())
+  const p = exist ? (exist.coche ? updateDoc(refArticle(exist.id), depuisInsertion && ordre ? { coche: false, ordre } : { coche: false }) : Promise.resolve())
                   : addDoc(colArticles(), { texte, coche: false, ordre: ordre || Date.now() });
   return p.then(() => memoriser(texte)).catch(erreur);
 }
@@ -775,7 +826,7 @@ async function ajouterPlusieurs(lignes, ici) {
 /* ---------- insérer un article juste sous un autre (touche Entrée) ---------- */
 let INSERT = null;   // { ordre } : la ligne d'insertion se place sous le dernier élément d'ordre <= INSERT.ordre
 function ouvrirInsertion(ordre) { INSERT = { ordre }; rendre(); const t = $("insert-txt"); if (t) t.focus(); }
-function fermerInsertion() { if (!INSERT) return; INSERT = null; const r = $("insert-ligne"); if (r) r.remove(); }
+function fermerInsertion() { if (!INSERT) return; INSERT = null; ["insert-ligne", "insert-sugg"].forEach((id) => { const r = $(id); if (r) r.remove(); }); }
 function poserInsertion(aFaire, valeur) {
   const li = document.createElement("li"); li.className = "art insertion"; li.id = "insert-ligne";
   const plus = document.createElement("span"); plus.className = "plus-petit"; plus.textContent = "+"; plus.setAttribute("aria-hidden", "true");
@@ -792,16 +843,19 @@ function poserInsertion(aFaire, valeur) {
     if (lignes.length < 2) return; e.preventDefault(); ajouterPlusieurs(lignes, true);
   });
   li.append(plus, t);
+  t.addEventListener("input", suggerer);
+  const ls = document.createElement("li"); ls.className = "sugg-ligne"; ls.id = "insert-sugg";
+  const bs = document.createElement("div"); bs.className = "sugg"; bs.setAttribute("aria-label", "Suggestions"); ls.appendChild(bs);
   const lis = [...$("liste").children], apres = aFaire.filter((a) => a.ordre <= INSERT.ordre).pop();
   const ref = apres ? lis.find((x) => x.dataset.id === apres.id) : null;
-  if (ref) ref.after(li); else $("liste").prepend(li);
+  if (ref) ref.after(ls, li); else $("liste").prepend(ls, li);
 }
 function validerInsertion(etFermer) {
   if (!INSERT) return;
   const t = $("insert-txt"), texte = t ? t.value.trim() : "";
   if (!texte) { fermerInsertion(); return; }
   const bas = INSERT.ordre, suiv = enListe().find((a) => a.ordre > bas), o = suiv ? (bas + suiv.ordre) / 2 : bas + 1000;
-  const dejaLa = ARTS.some((a) => !a.titre && cle(a.texte) === cle(texte));
+  const dejaLa = ARTS.some((a) => !a.titre && !a.coche && cle(a.texte) === cle(texte));
   t.value = "";
   ajouter(texte, o, true);
   if (etFermer) { fermerInsertion(); return; }
