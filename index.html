@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ma Liste</title>
+<meta name="theme-color" content="#2E7D4F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout : « marché frais » — bandeau vert feuille, liste sur une fiche blanche, fond crème, touches tomate */
+:root {
+  --bg: #FBF6EC;         /* fond crème */
+  --surface: #FFFFFF;    /* fiche de la liste */
+  --line: #ECE3D0;       /* séparateurs */
+  --fg: #2B2A24;         /* texte */
+  --muted: #8C8574;      /* texte secondaire, éléments cochés */
+  --leaf: #2E7D4F;       /* vert feuille : actions, cases */
+  --leaf-soft: #E6F2E8;  /* vert pâle : suggestions */
+  --tomato: #E1543A;     /* tomate : suppression, alertes */
+  --field: #FFFCF5;      /* fond des champs */
+  --font: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --display: "Fredoka", "Figtree", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.4 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: env(safe-area-inset-top, 0px) 32px; }
+.page { max-width: 560px; margin: 0 auto; }
+/* bandeau */
+header { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 16px 18px; border-radius: 18px; background: var(--leaf); color: #fff; box-shadow: 0 6px 18px rgba(46,125,79,.25); }
+h1 { margin: 0; font: 600 30px/1 var(--display); letter-spacing: .3px; flex: 1; }
+.deco-fruits { font-size: 22px; letter-spacing: 2px; }
+.etat { font-size: 12px; font-weight: 600; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
+.etat.alerte { background: var(--tomato); }
+/* fiche de la liste */
+.fiche { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 6px 14px 10px; box-shadow: 0 2px 10px rgba(80,60,20,.06); }
+ul { list-style: none; margin: 0; padding: 0; }
+li.art { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 2px 0; border-bottom: 1px solid var(--line); }
+li.art input[type=checkbox] { appearance: none; width: 26px; height: 26px; flex: none; margin: 0; border: 2px solid #9CC3A6; border-radius: 8px; cursor: pointer; display: grid; place-content: center; background: var(--field); transition: background .15s, border-color .15s; }
+li.art input[type=checkbox]:checked { background: var(--leaf); border-color: var(--leaf); }
+li.art input[type=checkbox]:checked::after { content: ""; width: 12px; height: 7px; border-left: 3px solid #fff; border-bottom: 3px solid #fff; transform: translateY(-2px) rotate(-45deg); }
+li.art input[type=checkbox]:focus-visible { outline: 3px solid #9CC3A6; outline-offset: 2px; }
+.txt { flex: 1; min-width: 0; background: transparent; border: none; color: var(--fg); font: 500 17px var(--font); padding: 8px 0; border-bottom: 2px solid transparent; }
+.txt:focus { outline: none; border-bottom-color: #9CC3A6; }
+li.coche .txt { color: var(--muted); font-weight: 400; text-decoration: line-through; }
+.suppr { flex: none; width: 38px; height: 38px; border: none; background: transparent; color: #C4BBA6; font-size: 24px; line-height: 1; border-radius: 50%; cursor: pointer; }
+.suppr:hover, .suppr:focus-visible { color: #fff; background: var(--tomato); outline: none; }
+.ajout { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.ajout .plus { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--leaf); color: #fff; display: grid; place-items: center; font: 600 20px/1 var(--display); }
+#nouveau { flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 2px solid var(--line); color: var(--fg); font: inherit; padding: 10px 0; }
+#nouveau::placeholder { color: var(--muted); }
+#nouveau:focus { outline: none; border-bottom-color: var(--leaf); }
+.sugg { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 6px 38px; }
+.sugg:empty { display: none; }
+.sugg button { border: 1px solid #CFE5D3; background: var(--leaf-soft); color: #1F5C39; font: 600 15px var(--font); padding: 7px 13px; border-radius: 18px; cursor: pointer; }
+.sugg button:hover, .sugg button:focus-visible { background: var(--leaf); color: #fff; border-color: var(--leaf); outline: none; }
+.sugg button small { color: var(--tomato); font-weight: 600; margin-left: 5px; }
+.sugg button:hover small, .sugg button:focus-visible small { color: #FFE2D8; }
+.poignee { flex: none; width: 30px; color: #B5AC97; font-size: 22px; line-height: 1; cursor: grab; touch-action: none; user-select: none; text-align: center; padding: 10px 0; }
+.poignee:hover { color: var(--leaf); }
+li.titre { border-bottom: 2px solid var(--leaf); margin-top: 6px; }
+li.titre .txt { font: 600 19px var(--display); color: var(--leaf); letter-spacing: .2px; }
+li.titre:first-child { margin-top: 0; }
+li.glisse { background: var(--leaf-soft); border-radius: 10px; box-shadow: 0 6px 16px rgba(46,125,79,.25); position: relative; z-index: 2; }
+body.en-glisse, body.en-glisse * { cursor: grabbing !important; user-select: none; }
+li.insertion { border-bottom: 2px dashed #CFE5D3; background: #FAFDF9; }
+.plus-petit { flex: none; width: 18px; text-align: center; color: var(--leaf); font: 600 18px var(--display); }
+.txt-insert { flex: 1; min-width: 0; background: transparent; border: none; color: var(--fg); font: 500 17px var(--font); padding: 12px 0; }
+.txt-insert::placeholder { color: var(--muted); font-weight: 400; }
+.txt-insert:focus { outline: none; }
+.astuce { color: var(--muted); font-size: 12px; padding: 0 0 4px 38px; }
+.outils-ajout { display: flex; justify-content: flex-start; padding: 2px 0 4px 38px; }
+.vide { color: var(--muted); padding: 16px 0 6px 38px; font-size: 15px; }
+/* éléments cochés */
+.bascule { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 16px; padding: 12px 16px; border: none; border-radius: 14px; background: #F3ECDD; color: #6B6455; font: 600 16px var(--font); cursor: pointer; text-align: left; }
+.bascule[aria-expanded="false"] .chev { transform: rotate(180deg); }
+.bascule .chev { width: 24px; display: grid; place-items: center; height: 20px; transition: transform .15s; }
+.bascule .chev::before { content: ""; width: 9px; height: 9px; border-left: 2px solid currentColor; border-top: 2px solid currentColor; transform: translateY(2px) rotate(45deg); }
+#zone-coches .fiche { margin-top: 8px; }
+.outils { display: flex; justify-content: flex-end; padding-top: 8px; }
+.lien { background: none; border: none; color: var(--leaf); font: 600 14px var(--font); cursor: pointer; padding: 6px 0; }
+.lien.rouge { color: var(--tomato); }
+.confirme { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 15px; }
+.confirme span { flex: 1; min-width: 180px; }
+.confirme button { border: none; border-radius: 10px; padding: 8px 14px; font: 600 14px var(--font); cursor: pointer; }
+.confirme .oui { background: var(--tomato); color: #fff; }
+.confirme .non { background: #F3ECDD; color: var(--fg); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* écran de connexion */
+.connexion { max-width: 400px; margin: 9vh auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: 0 10px 30px rgba(80,60,20,.10); }
+.connexion .haut { background: var(--leaf); color: #fff; text-align: center; padding: 26px 20px 22px; }
+.connexion .haut h1 { font-size: 40px; }
+.connexion .fruits { font-size: 30px; letter-spacing: 6px; margin-bottom: 10px; }
+.connexion .sous { margin-top: 8px; font-size: 15px; opacity: .9; }
+.connexion .corps { display: grid; gap: 12px; padding: 22px 22px 18px; }
+.connexion label { font-size: 13px; font-weight: 600; color: #6B6455; display: grid; gap: 5px; }
+.connexion input { background: var(--field); border: 1.5px solid var(--line); color: var(--fg); font: inherit; padding: 12px 13px; border-radius: 12px; }
+.connexion input:focus { outline: none; border-color: var(--leaf); }
+.connexion .go { background: var(--tomato); color: #fff; border: none; border-radius: 12px; padding: 13px; font: 600 18px var(--display); cursor: pointer; box-shadow: 0 4px 12px rgba(225,84,58,.3); }
+.connexion .go:hover { filter: brightness(1.05); }
+.connexion .msg { min-height: 20px; font-size: 14px; color: var(--tomato); text-align: center; }
+.connexion .msg.ok { color: var(--leaf); }
+.deco { background: none; border: none; color: var(--leaf); font: 600 13px var(--font); cursor: pointer; padding: 4px 0; }
+/* menu latéral */
+.btn-menu { flex: none; width: 40px; height: 40px; border: none; border-radius: 12px; background: rgba(255,255,255,.16); color: #fff; font-size: 22px; line-height: 1; cursor: pointer; }
+.btn-menu:hover, .btn-menu:focus-visible { background: rgba(255,255,255,.28); outline: none; }
+#voile { position: fixed; inset: 0; background: rgba(30,40,25,.35); z-index: 20; }
+#tiroir { position: fixed; top: 0; bottom: 0; left: 0; width: min(300px, 86vw); background: var(--bg); z-index: 21; box-shadow: 6px 0 24px rgba(0,0,0,.18);
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 12px calc(14px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px)); overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.tiroir-tete { display: flex; align-items: center; padding: 4px 8px 12px; }
+.tiroir-titre { flex: 1; font: 600 26px var(--display); color: var(--leaf); }
+.fermer-tiroir { border: none; background: transparent; font-size: 28px; color: var(--muted); cursor: pointer; width: 40px; height: 40px; border-radius: 50%; }
+.tiroir-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; padding: 6px 12px; }
+.tiroir-item { display: flex; align-items: center; gap: 12px; width: 100%; border: none; background: transparent; color: var(--fg); font: 600 16px var(--font); text-align: left; padding: 11px 12px; border-radius: 0 22px 22px 0; cursor: pointer; }
+.tiroir-item:hover, .tiroir-item:focus-visible { background: #F1EADB; outline: none; }
+a.tiroir-item { text-decoration: none; }
+.tiroir-item.actif { background: var(--leaf-soft); color: #1F5C39; }
+.tiroir-item .ic { width: 22px; text-align: center; flex: none; }
+.tiroir-item .nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tiroir-item .compte { margin-left: auto; font-size: 13px; color: var(--muted); font-weight: 600; }
+.ajout-item { color: var(--leaf); font-weight: 600; }
+.tiroir-sep { height: 1px; background: var(--line); margin: 8px 4px; }
+.tiroir-pied { margin-top: auto; padding: 16px 12px 4px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+/* fenêtre « renommer / archiver » */
+.pop { margin-top: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: 0 6px 18px rgba(80,60,20,.10); display: grid; gap: 10px; }
+.pop label { font-size: 13px; font-weight: 600; color: #6B6455; display: grid; gap: 5px; }
+.pop input { background: var(--field); border: 1.5px solid var(--line); color: var(--fg); font: inherit; padding: 9px 11px; border-radius: 10px; }
+.pop input:focus { outline: none; border-color: var(--leaf); }
+.pop-btns { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pop-gauche { display: flex; gap: 16px; flex-wrap: wrap; }
+.pop-ok { border: none; background: var(--leaf); color: #fff; font: 600 15px var(--font); padding: 8px 16px; border-radius: 10px; cursor: pointer; }
+/* notes */
+.btn-nouveau { margin-top: 14px; border: 2px dashed #CFE5D3; background: var(--surface); color: var(--leaf); font: 600 16px var(--font); width: 100%; padding: 12px; border-radius: 14px; cursor: pointer; }
+.btn-nouveau:hover { background: var(--leaf-soft); }
+.grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; align-items: start; }
+.carte { text-align: left; border: 1px solid rgba(0,0,0,.06); border-radius: 14px; padding: 12px 14px; cursor: pointer; font: inherit; color: var(--fg); box-shadow: 0 2px 8px rgba(80,60,20,.06); min-height: 70px; }
+.carte:hover, .carte:focus-visible { box-shadow: 0 4px 14px rgba(80,60,20,.16); outline: none; }
+.carte h3 { margin: 0 0 6px; font: 600 17px var(--display); overflow-wrap: anywhere; }
+.carte p { margin: 0; font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; color: #4A473E; }
+.carte .type { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 8px; display: block; }
+.note-edit { margin-top: 14px; border-radius: 16px; padding: 14px 16px 10px; border: 1px solid rgba(0,0,0,.06); box-shadow: 0 2px 10px rgba(80,60,20,.06); }
+.note-titre { width: 100%; background: transparent; border: none; font: 600 22px var(--display); color: var(--fg); padding: 4px 0 8px; }
+.note-titre:focus, .note-texte:focus { outline: none; }
+.note-texte { width: 100%; min-height: 50vh; background: transparent; border: none; resize: vertical; font: 17px/1.5 var(--font); color: var(--fg); padding: 0; }
+.note-bas { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.06); }
+.couleurs { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+.couleurs button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(0,0,0,.12); cursor: pointer; }
+.couleurs button.choisi { border-color: var(--leaf); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--leaf); }
+.note-etat { font-size: 12px; color: var(--muted); }
+.note-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 8px; }
+.note-droite { display: flex; gap: 16px; }
+/* archives */
+.arch { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-top: 10px; }
+.arch .nom { flex: 1; min-width: 150px; font-weight: 600; }
+.arch .nom small { display: block; color: var(--muted); font-weight: 500; font-size: 13px; }
+.arch button { border: none; border-radius: 10px; padding: 7px 12px; font: 600 14px var(--font); cursor: pointer; }
+.arch .rest { background: var(--leaf-soft); color: #1F5C39; }
+.arch .suppr-def { background: #FBE3DD; color: #A33A25; }
+.arch .oui { background: var(--tomato); color: #fff; }
+.deco-confirme { margin-top: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; color: var(--fg); font-size: 14px; line-height: 1.4; }
+.deco-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.deco-confirme button { border: none; border-radius: 10px; padding: 7px 12px; font: 600 14px var(--font); cursor: pointer; }
+.deco-confirme .oui { background: var(--tomato); color: #fff; }
+.deco-confirme .non { background: #F3ECDD; color: var(--fg); }
+/* sauvegarde */
+.bloc-s { margin-top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.bloc-s h3 { margin: 0 0 6px; font: 600 18px var(--display); color: var(--leaf); }
+.bloc-s p { margin: 4px 0; font-size: 15px; }
+.bloc-s .note { color: #6B6455; font-size: 14px; }
+.btns { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 8px; }
+.sauv-msg { min-height: 20px; font-size: 14px; font-weight: 600; color: var(--leaf); margin-top: 8px; }
+.sauv-msg.alerte { color: var(--tomato); }
+.btn-sauv { position: relative; font-size: 19px; }
+.pastille { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--tomato); color: #fff; font: 700 11px/20px var(--font); box-shadow: 0 0 0 2px var(--leaf); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; width: max-content; max-width: min(520px, calc(100vw - 32px)); background: #2B2A24; color: #fff; font: 600 14px/1.4 var(--font); padding: 10px 16px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.toast.alerte { background: var(--tomato); }
+.version { text-align: center; color: var(--muted); font-size: 12px; padding-top: 26px; }
+</style>
+</head>
+<body>
+
+<form class="connexion" id="ecran-connexion" hidden autocomplete="on">
+  <div class="haut">
+    <div class="fruits" aria-hidden="true">🥕🍅🥖🍋🧀</div>
+    <h1>Courses</h1>
+    <div class="sous">Ta liste, sur le téléphone et le PC</div>
+  </div>
+  <div class="corps">
+    <label>E-mail<input id="email" type="email" autocomplete="username" required></label>
+    <label>Mot de passe<input id="mdp" type="password" autocomplete="current-password" required></label>
+    <button class="go" type="submit">Se connecter</button>
+    <button class="lien" type="button" id="oubli">Mot de passe oublié ?</button>
+    <div class="msg" id="msg-connexion" role="status"></div>
+  </div>
+</form>
+
+<div id="app" hidden>
+<div id="voile" hidden></div>
+<nav id="tiroir" aria-label="Menu" hidden>
+  <div class="tiroir-tete"><span class="tiroir-titre">Courses</span><button class="fermer-tiroir" id="fermer-tiroir" type="button" aria-label="Fermer le menu">×</button></div>
+  <div class="tiroir-label">Listes</div>
+  <div id="tiroir-listes"></div>
+  <button class="tiroir-item ajout-item" id="nouvelle-liste" type="button"><span class="ic">＋</span>Nouvelle liste</button>
+  <div class="tiroir-sep"></div>
+  <button class="tiroir-item" id="aller-notes" type="button"><span class="ic">📝</span>Notes<span class="compte" id="nb-notes"></span></button>
+  <button class="tiroir-item ajout-item" id="nouvelle-note" type="button"><span class="ic">＋</span>Nouvelle note</button>
+  <div class="tiroir-sep"></div>
+  <button class="tiroir-item" id="aller-archives" type="button"><span class="ic">🗄️</span>Archives<span class="compte" id="nb-archives"></span></button>
+  <button class="tiroir-item" id="aller-sauvegarde" type="button"><span class="ic">💾</span>Sauvegarde</button>
+  <a class="tiroir-item" id="aller-aide" href="aide.html" target="_blank" rel="noopener"><span class="ic">❓</span>Aide</a>
+  <div class="tiroir-pied">Ma Liste — JLApplis<br><small>tirée de Courses <span id="version"></span>, licence GPL v3</small><br><button class="deco" id="deco" type="button" hidden>Se déconnecter</button>
+    <div class="deco-confirme" id="deco-confirme" hidden><span>Se déconnecter ? Pour te reconnecter, il faudra du réseau.</span><span class="deco-btns"><button class="non" id="deco-non" type="button">Annuler</button><button class="oui" id="deco-oui" type="button">Se déconnecter</button></span></div></div>
+</nav>
+
+<div class="page">
+  <header>
+    <button class="btn-menu" id="btn-menu" type="button" aria-label="Ouvrir le menu">☰</button>
+    <h1 id="titre-vue">Courses</h1>
+    <span class="etat" id="etat">Chargement…</span>
+    <button class="btn-menu btn-sauv" id="btn-sauv" type="button" title="Sauvegarder" aria-label="Sauvegarder">💾<span class="pastille" id="pastille-sauv" hidden></span></button>
+    <button class="btn-menu" id="btn-actions" type="button" aria-label="Renommer ou archiver" hidden>⋮</button>
+  </header>
+  <div class="pop" id="pop-actions" hidden>
+    <label>Nom<input id="pop-nom" type="text" autocomplete="off"></label>
+    <div class="pop-btns"><span class="pop-gauche"><button class="lien" id="pop-archiver" type="button">🗄️ Archiver</button><button class="lien rouge" id="pop-supprimer" type="button">🗑️ Supprimer</button></span><button class="pop-ok" id="pop-ok" type="button">Enregistrer</button></div>
+    <div class="confirme" id="pop-confirme" hidden><span id="pop-confirme-txt"></span><button class="non" id="pop-non" type="button">Annuler</button><button class="oui" id="pop-oui" type="button">Supprimer</button></div>
+  </div>
+
+  <section id="vue-liste" hidden>
+  <div class="fiche">
+    <ul id="liste" aria-label="Articles à acheter"></ul>
+    <div id="vide" class="vide" hidden>La liste est vide. Ajoute un article ci-dessous.</div>
+    <form class="ajout" id="form-ajout" autocomplete="off">
+      <span class="plus" aria-hidden="true">+</span>
+      <input id="nouveau" type="text" placeholder="Ajouter un article ou coller une liste" aria-label="Ajouter un article" enterkeyhint="done">
+    </form>
+    <div class="sugg" id="sugg" aria-label="Suggestions"></div>
+    <div class="astuce">Astuce : touche Entrée sur un article pour en ajouter un juste dessous.</div>
+    <div class="outils-ajout"><button class="lien" id="ajout-titre" type="button" title="Ajoute un titre de magasin en fin de liste (le texte tapé ci-dessus devient son nom)">🏪 Ajouter un magasin</button></div>
+  </div>
+
+  <button class="bascule" id="bascule" type="button" aria-expanded="false" hidden>
+    <span class="chev" aria-hidden="true"></span><span id="nb-coches"></span>
+  </button>
+  <div id="zone-coches" hidden>
+    <div class="fiche"><ul id="coches" aria-label="Articles cochés"></ul></div>
+    <div class="outils"><button class="lien rouge" id="vider" type="button">Supprimer les éléments cochés</button></div>
+    <div id="confirme"></div>
+  </div>
+  </section>
+
+  <section id="vue-notes" hidden>
+    <button class="btn-nouveau" id="nouvelle-note-2" type="button">＋ Nouvelle note</button>
+    <div class="grille" id="grille-notes"></div>
+    <div class="vide" id="notes-vide" hidden>Aucune note pour l'instant.</div>
+  </section>
+
+  <section id="vue-note" hidden>
+    <div class="note-edit" id="note-edit">
+      <input id="note-titre" class="note-titre" type="text" placeholder="Titre" autocomplete="off" aria-label="Titre de la note">
+      <textarea id="note-texte" class="note-texte" placeholder="Écris ta note…" aria-label="Texte de la note"></textarea>
+      <div class="note-bas">
+        <div class="couleurs" id="couleurs" aria-label="Couleur de la note"></div>
+        <span class="note-etat" id="note-etat"></span>
+      </div>
+    </div>
+    <div class="note-actions"><button class="lien" id="note-retour" type="button">← Toutes les notes</button><span class="note-droite"><button class="lien" id="note-archiver" type="button">🗄️ Archiver</button><button class="lien rouge" id="note-supprimer" type="button">🗑️ Supprimer</button></span></div>
+    <div class="confirme" id="note-confirme" hidden><span>Supprimer définitivement cette note ?</span><button class="non" id="note-non" type="button">Annuler</button><button class="oui" id="note-oui" type="button">Supprimer</button></div>
+  </section>
+
+  <section id="vue-sauvegarde" hidden>
+    <div class="bloc-s"><h3>Contenu</h3><p class="note"><b>Tes listes sont enregistrées uniquement dans ce navigateur, sur cet appareil.</b> Si les données du navigateur sont effacées, elles sont perdues : sauvegarde régulièrement. Une sauvegarde permet aussi de passer sur un autre appareil (↩️ Restaurer).</p><p id="sauv-contenu"></p><p class="note">Dernière sauvegarde depuis cet appareil : <b id="sauv-derniere"></b></p></div>
+    <div class="bloc-s"><h3>💾 Sauvegarder</h3>
+      <p class="note">Crée un fichier JSON daté avec toutes tes listes, leurs articles, les suggestions, les notes et les archives. </p>
+      <p class="note">Dossier de sauvegarde : <b id="fs-nom">…</b></p>
+      <div class="btns"><button class="pop-ok" id="sauv-go" type="button">💾 Sauvegarder maintenant</button><button class="lien" id="fs-choisir" type="button" hidden>📁 Choisir le dossier…</button><button class="lien rouge" id="fs-oublier" type="button" hidden>Retirer le dossier</button></div>
+      <p class="note" id="fs-aide"></p>
+    </div>
+    <div class="bloc-s"><h3>↩️ Restaurer</h3>
+      <p class="note">Remplace <b>toutes</b> les données actuelles par celles d'un fichier de sauvegarde Ma Liste (ou de la démo Courses). Juste avant, l'état actuel est sauvegardé automatiquement (fichier « MA-LISTE_avant_restauration_… »). </p>
+      <div class="btns"><button class="lien" id="rest-choisir" type="button">📂 Choisir une sauvegarde…</button></div>
+      <div class="confirme" id="rest-confirme" hidden><span id="rest-txt"></span><button class="non" id="rest-non" type="button">Annuler</button><button class="oui" id="rest-oui" type="button">Tout remplacer</button></div>
+      <input type="file" id="file-json" accept=".json,application/json" hidden>
+    </div>
+    <div class="sauv-msg" id="sauv-msg" role="status"></div>
+  </section>
+
+  <section id="vue-archives" hidden>
+    <div id="liste-archives"></div>
+    <div class="vide" id="archives-vide" hidden>Rien dans les archives.</div>
+  </section>
+</div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module">
+/*
+    Ma Liste — liste de courses sans compte (JLApplis), tirée de Courses 1.15
+    Les données restent dans le navigateur de l'appareil (localStorage) : pas de compte, pas de Firebase, rien n'est envoyé.
+    Fichiers à côté : manifest.webmanifest, sw.js, icon-192.png, icon-512.png, aide.html
+    Copyright (C) 2026 Jluc — JLApplis — Licence GPL v3 (voir LICENSE)
+*/
+// ======================================================================
+// MA LISTE — remplace Firebase par une base enregistrée uniquement dans ce
+// navigateur (localStorage, clés « ma-liste… »). Aucun compte, aucun envoi sur Internet.
+// ======================================================================
+const { initializeApp, getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
+  initializeFirestore, persistentLocalCache, collection, doc, fbAddDoc, fbUpdateDoc, fbDeleteDoc, fbSetDoc,
+  onSnapshot, getDocs, getDocsFromCache, getDoc, writeBatch } = (function () {
+  const CLE_BASE = "ma-liste-base", CLE_SESSION = "ma-liste-session";
+  const EMAIL = "demo@demo.example", CODE = "demo1234", UID = "uid-demo";
+  let base = null;                      // { chemin: données }
+  const ecouteurs = [];
+  let auto = 0;
+
+  /* ---------- base enregistrée dans le navigateur ---------- */
+  function charger() {
+    if (base) return;
+    try { base = JSON.parse(localStorage.getItem(CLE_BASE) || "null"); } catch (e) { base = null; }
+    if (!base || typeof base !== "object") {   // première ouverture : la liste principale, vide
+      base = { ["users/" + UID + "/groupes/courses"]: { nom: "Liste de courses", type: "liste", legacy: true, archive: false, ordre: 0, modifieLe: Date.now() } };
+      enregistrer();
+    }
+  }
+  function enregistrer() { try { localStorage.setItem(CLE_BASE, JSON.stringify(base)); } catch (e) { /* stockage indisponible : la démo reste en mémoire */ } }
+  const copie = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
+  const parent = (p) => p.split("/").slice(0, -1).join("/");
+  const refDoc = (p) => ({ type: "document", path: p, id: p.split("/").pop() });
+  function snapCol(path) {
+    const docs = Object.keys(base).filter((k) => parent(k) === path).sort()
+      .map((k) => ({ id: k.split("/").pop(), ref: refDoc(k), data: () => copie(base[k]) }));
+    return { docs, empty: !docs.length, size: docs.length, metadata: { fromCache: false, hasPendingWrites: false } };
+  }
+  function snapDoc(path) { const v = base[path]; return { id: path.split("/").pop(), ref: refDoc(path), exists: () => v !== undefined, data: () => copie(v), metadata: { fromCache: false, hasPendingWrites: false } }; }
+  function prevenir() { ecouteurs.slice().forEach((l) => l.cb(l.ref.type === "collection" ? snapCol(l.ref.path) : snapDoc(l.ref.path))); }
+  function ecrire(f) { charger(); f(); enregistrer(); prevenir(); return Promise.resolve(); }
+  function fusion(a, b) {
+    const r = Object.assign({}, a || {});
+    Object.keys(b).forEach((k) => { const v = b[k]; r[k] = v && typeof v === "object" && !Array.isArray(v) ? fusion(r[k] && typeof r[k] === "object" ? r[k] : {}, v) : v; });
+    return r;
+  }
+  const chemin = (racine, segs) => [racine && racine.path, ...segs].filter(Boolean).join("/");
+
+  /* ---------- connexion simulée ---------- */
+  let utilisateur = { uid: UID, email: "" }, rappelAuth = null;   // toujours « connecté » : pas de compte
+  const erreurAuth = (code) => { const e = new Error(code); e.code = code; return e; };
+
+  return {
+    initializeApp: () => ({}),
+    getAuth: () => ({}),
+    onAuthStateChanged(a, cb) { rappelAuth = cb; setTimeout(() => cb(utilisateur), 0); return () => {}; },
+    signInWithEmailAndPassword(a, email, code) {
+      if (String(email).trim().toLowerCase() !== EMAIL || code !== CODE) return Promise.reject(erreurAuth("auth/invalid-credential"));
+      utilisateur = { uid: UID, email: EMAIL };
+      try { localStorage.setItem(CLE_SESSION, UID); } catch (e) { /* sans gravité */ }
+      setTimeout(() => rappelAuth && rappelAuth(utilisateur), 0);
+      return Promise.resolve({ user: utilisateur });
+    },
+    sendPasswordResetEmail: () => Promise.reject(erreurAuth("démo : aucun e-mail n'est envoyé — le mot de passe est demo1234")),
+    signOut() { utilisateur = null; try { localStorage.removeItem(CLE_SESSION); } catch (e) { /* sans gravité */ } setTimeout(() => rappelAuth && rappelAuth(null), 0); return Promise.resolve(); },
+    initializeFirestore: () => ({ path: "" }),
+    persistentLocalCache: () => ({}),
+    collection: (racine, ...segs) => ({ type: "collection", path: chemin(racine, segs) }),
+    doc(racine, ...segs) {
+      if (racine.type === "collection" && !segs.length) segs = ["ml-" + Date.now().toString(36) + (++auto).toString(36) + Math.random().toString(36).slice(2, 6)];
+      return refDoc(chemin(racine, segs));
+    },
+    fbSetDoc: (r, d, opt) => ecrire(() => { base[r.path] = opt && opt.merge ? fusion(base[r.path], copie(d)) : copie(d); }),
+    fbAddDoc(col, d) { const r = refDoc(col.path + "/ml-" + Date.now().toString(36) + (++auto).toString(36)); return ecrire(() => { base[r.path] = copie(d); }).then(() => r); },
+    fbUpdateDoc: (r, d) => (charger(), base[r.path] === undefined ? Promise.reject(erreurAuth("not-found"))
+      : ecrire(() => { base[r.path] = Object.assign({}, base[r.path], copie(d)); })),
+    fbDeleteDoc: (r) => ecrire(() => { delete base[r.path]; }),
+    onSnapshot(ref, a, b) {
+      charger();
+      const cb = typeof a === "function" ? a : b, l = { ref, cb }; ecouteurs.push(l);
+      setTimeout(() => { if (ecouteurs.includes(l)) cb(ref.type === "collection" ? snapCol(ref.path) : snapDoc(ref.path)); }, 0);
+      return () => { const i = ecouteurs.indexOf(l); if (i >= 0) ecouteurs.splice(i, 1); };
+    },
+    getDocs: (col) => (charger(), Promise.resolve(snapCol(col.path))),
+    getDocsFromCache: (col) => (charger(), Promise.resolve(snapCol(col.path))),
+    getDoc: (r) => (charger(), Promise.resolve(snapDoc(r.path))),
+    writeBatch() {
+      const ops = [];
+      return {
+        set(r, d) { ops.push(() => { base[r.path] = copie(d); }); return this; },
+        delete(r) { ops.push(() => { delete base[r.path]; }); return this; },
+        commit: () => ecrire(() => ops.forEach((f) => f()))
+      };
+    }
+  };
+})();
+
+const VERSION = "1.15";
+
+/* chaque écriture compte comme une modification non sauvegardée (sur cet appareil) */
+const KEY_MODIFS = "ma-liste_modifs";
+function nbModifs() { try { return Number(localStorage.getItem(KEY_MODIFS)) || 0; } catch (e) { return 0; } }
+function fixerModifs(n) { try { localStorage.setItem(KEY_MODIFS, String(Math.max(0, n))); } catch (e) { /* sans gravité */ } majBoutonSauv(); }
+function marquerModif() { fixerModifs(nbModifs() + 1); }
+const addDoc = (...a) => { marquerModif(); return fbAddDoc(...a); };
+const updateDoc = (...a) => { marquerModif(); return fbUpdateDoc(...a); };
+const deleteDoc = (...a) => { marquerModif(); return fbDeleteDoc(...a); };
+const setDoc = (...a) => { marquerModif(); return fbSetDoc(...a); };
+
+/* ===== MA LISTE : pas de Firebase, la base est dans le navigateur ===== */
+const firebaseConfig = {};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+// cache local : la liste s'affiche et se modifie même sans réseau dans le magasin, puis se synchronise
+const db = initializeFirestore(app, { localCache: persistentLocalCache() });
+
+const $ = (id) => document.getElementById(id);
+let UID = null, ARTS = [], HISTO = {}, ouvert = false, desabonner = [], glisse = null, aRendre = false;
+let GROUPES = [], G = null, VUE = null, desabListe = [], groupesCharges = false;
+try { ouvert = localStorage.getItem("ma-liste_coches_ouvert") === "1"; } catch (e) { /* sans gravité */ }
+$("version").textContent = VERSION;
+
+const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const cle = (s) => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 120) || "x";
+// « Liste de courses » (id « courses ») garde l'emplacement d'origine des données ; les autres listes ont le leur
+const colGroupes = () => collection(db, "users", UID, "groupes");
+const refGroupe = (gid) => doc(db, "users", UID, "groupes", gid);
+const colArticlesDe = (g) => g.legacy ? collection(db, "users", UID, "articles") : collection(db, "users", UID, "groupes", g.id, "articles");
+const refHistoDe = (g) => g.legacy ? doc(db, "users", UID, "meta", "historique") : doc(db, "users", UID, "groupes", g.id, "meta", "historique");
+const colArticles = () => colArticlesDe(G);
+const refArticle = (id) => doc(colArticlesDe(G), id);
+const refHisto = () => refHistoDe(G);
+function etat(msg, alerte) { const e = $("etat"); e.textContent = msg || ""; e.classList.toggle("alerte", !!alerte); }
+function erreur(e) { console.error(e); etat("Enregistrement impossible, réessaie", true); }
+
+/* ---------- connexion ---------- */
+$("ecran-connexion").addEventListener("submit", (e) => {
+  e.preventDefault(); const m = $("msg-connexion"); m.className = "msg"; m.textContent = "Connexion…";
+  signInWithEmailAndPassword(auth, $("email").value.trim(), $("mdp").value)
+    .then(() => { m.textContent = ""; })
+    .catch((err) => { m.textContent = (!navigator.onLine || err.code === "auth/network-request-failed") ? "Pas de réseau : la connexion a besoin d'internet. Réessaie dès que le réseau revient." : /invalid-credential|wrong-password|user-not-found|invalid-email/.test(err.code) ? "E-mail ou mot de passe incorrect." : "Connexion impossible (" + err.code + ")."; });
+});
+$("oubli").addEventListener("click", () => {
+  const m = $("msg-connexion"), mail = $("email").value.trim();
+  if (!mail) { m.className = "msg"; m.textContent = "Indique d'abord ton e-mail."; return; }
+  sendPasswordResetEmail(auth, mail).then(() => { m.className = "msg ok"; m.textContent = "E-mail de réinitialisation envoyé."; })
+    .catch((err) => { m.className = "msg"; m.textContent = "Envoi impossible (" + err.code + ")."; });
+});
+$("deco").addEventListener("click", () => { $("deco-confirme").hidden = false; $("deco").hidden = true; $("deco-non").focus(); });
+$("deco-non").addEventListener("click", () => { $("deco-confirme").hidden = true; $("deco").hidden = false; });
+$("deco-oui").addEventListener("click", () => { $("deco-confirme").hidden = true; $("deco").hidden = false; signOut(auth); });
+
+onAuthStateChanged(auth, (u) => {
+  desabonner.forEach((f) => f()); desabonner = []; desabListe.forEach((f) => f()); desabListe = [];
+  ARTS = []; HISTO = {}; GROUPES = []; G = null; VUE = null; groupesCharges = false;
+  UID = u ? u.uid : null;
+  $("ecran-connexion").hidden = !!u; $("app").hidden = !u;
+  if (!u) return;
+  etat("Chargement…");
+  desabonner.push(onSnapshot(colGroupes(), (snap) => {
+    GROUPES = snap.docs.map((d) => { const x = d.data(); return { id: d.id, nom: String(x.nom || ""), type: x.type === "note" ? "note" : "liste", archive: !!x.archive,
+      ordre: x.ordre || 0, legacy: !!x.legacy, texte: String(x.texte || ""), couleur: x.couleur || "", modifieLe: x.modifieLe || 0 }; });
+    if (!snap.metadata.fromCache && !GROUPES.some((g) => g.id === "courses")) {
+      // première ouverture : la liste existante devient « Liste de courses »
+      setDoc(refGroupe("courses"), { nom: "Liste de courses", type: "liste", legacy: true, archive: false, ordre: 0, modifieLe: Date.now() }, { merge: true }).catch(erreur);
+      return;
+    }
+    if (!GROUPES.length) return;
+    groupesCharges = true;
+    rendreTiroir();
+    if (!VUE) { let v = null; try { v = JSON.parse(localStorage.getItem("ma-liste_vue") || "null"); } catch (e) { v = null; } montrer(v && vueValide(v) ? v : { type: "liste", id: "courses" }); }
+    else if (!vueValide(VUE)) montrer({ type: "liste", id: (listesActives()[0] || {}).id || "courses" });
+    else rafraichirVue();
+  }, (err) => etat("Listes injoignables (" + err.code + ")", true)));
+});
+
+/* ---------- menu, groupes et vues ---------- */
+const listesActives = () => GROUPES.filter((g) => g.type === "liste" && !g.archive).sort((a, b) => a.ordre - b.ordre);
+const notesActives = () => GROUPES.filter((g) => g.type === "note" && !g.archive).sort((a, b) => b.modifieLe - a.modifieLe);
+const archives = () => GROUPES.filter((g) => g.archive).sort((a, b) => b.modifieLe - a.modifieLe);
+const groupe = (id) => GROUPES.find((g) => g.id === id);
+function vueValide(v) {
+  if (!v || !v.type) return false;
+  if (v.type === "notes" || v.type === "archives" || v.type === "sauvegarde") return true;
+  const g = groupe(v.id); return !!g && !g.archive && g.type === (v.type === "note" ? "note" : "liste");
+}
+function ouvrirTiroir(o) { $("tiroir").hidden = !o; $("voile").hidden = !o; if (o) { const b = $("tiroir").querySelector(".tiroir-item.actif") || $("fermer-tiroir"); b.focus(); } }
+function rendreTiroir() {
+  $("tiroir-listes").replaceChildren(...listesActives().map((g) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tiroir-item" + (VUE && VUE.type === "liste" && VUE.id === g.id ? " actif" : "");
+    const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = g.id === "courses" ? "🛒" : "☑️";
+    const n = document.createElement("span"); n.className = "nom"; n.textContent = g.nom || "Sans nom";
+    b.append(ic, n); b.addEventListener("click", () => montrer({ type: "liste", id: g.id })); return b;
+  }));
+  $("aller-notes").classList.toggle("actif", !!VUE && (VUE.type === "notes" || VUE.type === "note"));
+  $("aller-archives").classList.toggle("actif", !!VUE && VUE.type === "archives");
+  $("aller-sauvegarde").classList.toggle("actif", !!VUE && VUE.type === "sauvegarde");
+  $("nb-notes").textContent = notesActives().length || ""; $("nb-archives").textContent = archives().length || "";
+}
+function montrer(v) {
+  if (VUE && VUE.type === "note") enregistrerNote(true);
+  VUE = v; try { localStorage.setItem("ma-liste_vue", JSON.stringify(v)); } catch (e) { /* sans gravité */ }
+  ouvrirTiroir(false); $("pop-actions").hidden = true;
+  ["liste", "notes", "note", "archives", "sauvegarde"].forEach((t) => { $("vue-" + t).hidden = t !== v.type; });
+  if (v.type !== "liste") { desabListe.forEach((f) => f()); desabListe = []; G = null; fermerInsertion(); }
+  if (v.type === "liste") ouvrirListe(v.id);
+  rafraichirVue(); rendreTiroir(); window.scrollTo(0, 0);
+}
+function rafraichirVue() {
+  const v = VUE; if (!v) return;
+  const g = v.id ? groupe(v.id) : null;
+  $("titre-vue").textContent = v.type === "notes" ? "Notes" : v.type === "archives" ? "Archives" : v.type === "sauvegarde" ? "Sauvegarde" : (g ? (g.nom || (g.type === "note" ? "Note" : "Sans nom")) : "");
+  $("btn-actions").hidden = v.type !== "liste";
+  $("etat").hidden = v.type !== "liste";
+  if (v.type === "notes") rendreNotes();
+  if (v.type === "archives") rendreArchives();
+  if (v.type === "sauvegarde") rendreSauvegarde();
+  if (v.type === "note" && g && document.activeElement !== $("note-titre") && document.activeElement !== $("note-texte") && !NOTE_SALE) chargerNote(g);
+}
+function ouvrirListe(gid) {
+  const g = groupe(gid); if (!g) return;
+  if (G && G.id === gid && desabListe.length) { G = g; return; }
+  desabListe.forEach((f) => f()); desabListe = []; fermerInsertion();
+  G = g; ARTS = []; HISTO = {}; $("nouveau").value = ""; rendre();
+  etat("Chargement…");
+  const minuteur = setTimeout(() => etat("Hors ligne — les changements seront envoyés au retour du réseau", true), 10000);
+  desabListe.push(onSnapshot(colArticles(), { includeMetadataChanges: true }, (snap) => {
+    ARTS = snap.docs.map((d) => { const x = d.data(); return { id: d.id, texte: String(x.texte || ""), coche: !!x.coche, ordre: x.ordre || 0, cocheLe: x.cocheLe || 0, titre: x.type === "titre" }; });
+    if (!snap.metadata.fromCache) { clearTimeout(minuteur); etat(snap.metadata.hasPendingWrites ? "Enregistrement…" : "À jour"); }
+    if (!glisse) rendre(); else aRendre = true;
+  }, (err) => { clearTimeout(minuteur); etat("Liste injoignable (" + err.code + ")", true); }));
+  desabListe.push(onSnapshot(refHisto(), (s) => {
+    const t = s.exists() ? (s.data().termes || {}) : {}; HISTO = {};
+    Object.keys(t).forEach((k) => { if (t[k] && t[k].t) HISTO[k] = { t: String(t[k].t), n: Number(t[k].n) || 1 }; });
+    suggerer();
+  }, () => { /* suggestions indisponibles : la liste fonctionne quand même */ }));
+}
+function creerGroupe(type) {
+  // identifiant créé tout de suite, sans attendre le serveur : marche aussi hors ligne
+  const ordre = Math.max(0, ...GROUPES.map((g) => g.ordre || 0)) + 1, r = doc(colGroupes());
+  const data = { nom: type === "note" ? "" : "Nouvelle liste", type, archive: false, ordre, texte: "", couleur: type === "note" ? COULEURS[0] : "", modifieLe: Date.now() };
+  setDoc(r, data).catch(erreur);
+  if (!groupe(r.id)) GROUPES.push({ id: r.id, legacy: false, ...data });   // pas de doublon si l'écouteur l'a déjà reçue
+  if (type === "note") { montrer({ type: "note", id: r.id }); setTimeout(() => $("note-titre").focus(), 50); }
+  else { montrer({ type: "liste", id: r.id }); ouvrirActions(true); }
+}
+function archiverGroupe(gid, oui) {
+  updateDoc(refGroupe(gid), { archive: oui, modifieLe: Date.now() }).catch(erreur);
+  const g = groupe(gid); if (g) g.archive = oui;
+}
+async function supprimerGroupe(gid) {
+  const g = groupe(gid); if (!g) return;
+  // les suppressions sont lancées sans attendre chacune le serveur : hors ligne, tout est fait sur l'appareil
+  // et envoyé au retour du réseau
+  deleteDoc(refGroupe(gid)).catch(erreur);
+  if (g.type === "liste") {
+    deleteDoc(refHistoDe(g)).catch(() => {});
+    const vus = new Set(), effacer = (snap) => snap.docs.forEach((d) => { if (!vus.has(d.id)) { vus.add(d.id); deleteDoc(d.ref).catch(erreur); } });
+    effacer(await getDocsFromCache(colArticlesDe(g)).catch(() => ({ docs: [] })));   // articles déjà sur l'appareil : tout de suite
+    effacer(await getDocs(colArticlesDe(g)));                                          // ceux que seul le serveur connaît
+  }
+}
+/* renommer / archiver la liste affichée */
+function ouvrirActions(o) {
+  const p = $("pop-actions"); p.hidden = !o; if (!o || !VUE) return;
+  const g = groupe(VUE.id); $("pop-nom").value = g ? g.nom : ""; $("pop-nom").focus(); $("pop-nom").select();
+  $("pop-supprimer").hidden = !g || g.id === "courses";   // la liste principale est protégée
+  $("pop-archiver").hidden = !g || g.id === "courses";    // … ni supprimée, ni archivée
+  $("pop-confirme").hidden = true;
+}
+function validerNom() {
+  const g = groupe(VUE.id), nom = $("pop-nom").value.trim(); if (!g || !nom) { ouvrirActions(false); return; }
+  if (nom !== g.nom) { g.nom = nom; updateDoc(refGroupe(g.id), { nom, modifieLe: Date.now() }).catch(erreur); rafraichirVue(); rendreTiroir(); }
+  ouvrirActions(false);
+}
+/* notes */
+const COULEURS = ["#FFF7D6", "#E6F2E8", "#FDE4DC", "#E3EEF9", "#F1E6F7", "#FFFFFF"];
+let NOTE_SALE = false, minuteurNote = null;
+function rendreNotes() {
+  const l = notesActives();
+  $("notes-vide").hidden = l.length > 0;
+  $("grille-notes").replaceChildren(...l.map((g) => {
+    const c = document.createElement("button"); c.type = "button"; c.className = "carte"; c.style.background = g.couleur || COULEURS[0];
+    if (g.nom) { const h = document.createElement("h3"); h.textContent = g.nom; c.appendChild(h); }
+    const p = document.createElement("p"); p.textContent = g.texte || (g.nom ? "" : "Note vide"); c.appendChild(p);
+    c.addEventListener("click", () => montrer({ type: "note", id: g.id })); return c;
+  }));
+}
+function chargerNote(g) {
+  $("note-confirme").hidden = true;
+  $("note-titre").value = g.nom; $("note-texte").value = g.texte; $("note-edit").style.background = g.couleur || COULEURS[0];
+  $("couleurs").replaceChildren(...COULEURS.map((c) => {
+    const b = document.createElement("button"); b.type = "button"; b.style.background = c; b.className = c === (g.couleur || COULEURS[0]) ? "choisi" : ""; b.setAttribute("aria-label", "Couleur " + c);
+    b.addEventListener("click", () => { g.couleur = c; updateDoc(refGroupe(g.id), { couleur: c }).catch(erreur); chargerNote(g); }); return b;
+  }));
+  $("note-etat").textContent = "";
+}
+function noteModifiee() { NOTE_SALE = true; $("note-etat").textContent = "…"; clearTimeout(minuteurNote); minuteurNote = setTimeout(() => enregistrerNote(false), 800); }
+function enregistrerNote(maintenant) {
+  clearTimeout(minuteurNote);
+  if (!NOTE_SALE || !VUE || VUE.type !== "note") return;
+  const g = groupe(VUE.id); if (!g) return;
+  const nom = $("note-titre").value.trim(), texte = $("note-texte").value;
+  NOTE_SALE = false; g.nom = nom; g.texte = texte; g.modifieLe = Date.now();
+  updateDoc(refGroupe(g.id), { nom, texte, modifieLe: g.modifieLe }).then(() => { if (VUE && VUE.id === g.id) $("note-etat").textContent = "Enregistré"; }).catch(erreur);
+}
+/* archives */
+function rendreArchives() {
+  const l = archives();
+  $("archives-vide").hidden = l.length > 0;
+  $("liste-archives").replaceChildren(...l.map((g) => {
+    const d = document.createElement("div"); d.className = "arch";
+    const n = document.createElement("div"); n.className = "nom"; n.textContent = (g.type === "note" ? "📝 " : "☑️ ") + (g.nom || "Note sans titre");
+    const sm = document.createElement("small"); sm.textContent = g.type === "note" ? (g.texte.slice(0, 60) || "Note") : "Liste"; n.appendChild(sm);
+    const r = document.createElement("button"); r.type = "button"; r.className = "rest"; r.textContent = "Restaurer";
+    r.addEventListener("click", () => { archiverGroupe(g.id, false); rendreArchives(); rendreTiroir(); });
+    const x = document.createElement("button"); x.type = "button"; x.className = "suppr-def"; x.textContent = "Supprimer";
+    x.addEventListener("click", () => {
+      x.remove(); const o = document.createElement("button"); o.type = "button"; o.className = "oui"; o.textContent = "Supprimer définitivement ?";
+      o.addEventListener("click", () => { o.disabled = true; o.textContent = "Suppression…"; supprimerGroupe(g.id).catch(erreur); });
+      d.appendChild(o);
+    });
+    d.append(n, r, x); return d;
+  }));
+}
+$("btn-menu").addEventListener("click", () => ouvrirTiroir(true));
+$("fermer-tiroir").addEventListener("click", () => ouvrirTiroir(false));
+$("voile").addEventListener("click", () => ouvrirTiroir(false));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("tiroir").hidden) ouvrirTiroir(false); });
+$("nouvelle-liste").addEventListener("click", () => creerGroupe("liste"));
+$("nouvelle-note").addEventListener("click", () => creerGroupe("note"));
+$("nouvelle-note-2").addEventListener("click", () => creerGroupe("note"));
+$("aller-notes").addEventListener("click", () => montrer({ type: "notes" }));
+$("aller-archives").addEventListener("click", () => montrer({ type: "archives" }));
+$("aller-sauvegarde").addEventListener("click", () => { $("sauv-msg").textContent = ""; montrer({ type: "sauvegarde" }); });
+$("btn-actions").addEventListener("click", () => ouvrirActions($("pop-actions").hidden));
+$("pop-ok").addEventListener("click", validerNom);
+$("pop-nom").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); validerNom(); } if (e.key === "Escape") ouvrirActions(false); });
+$("pop-archiver").addEventListener("click", () => { const id = VUE.id; if (id === "courses") return; archiverGroupe(id, true); montrer({ type: "liste", id: (listesActives()[0] || {}).id || "courses" }); });
+$("pop-supprimer").addEventListener("click", () => {
+  const g = groupe(VUE.id); if (!g || g.id === "courses") return;
+  $("pop-confirme-txt").textContent = "Supprimer définitivement « " + (g.nom || "Sans nom") + " » et tous ses articles ?";
+  $("pop-confirme").hidden = false; $("pop-non").focus();
+});
+$("pop-non").addEventListener("click", () => { $("pop-confirme").hidden = true; });
+$("pop-oui").addEventListener("click", () => {
+  const id = VUE && VUE.id; if (!id || id === "courses") return;
+  $("pop-confirme").hidden = true;
+  supprimerGroupe(id).catch(erreur);
+  GROUPES = GROUPES.filter((g) => g.id !== id);
+  montrer({ type: "liste", id: "courses" });
+});
+$("note-titre").addEventListener("input", noteModifiee);
+$("note-texte").addEventListener("input", noteModifiee);
+$("note-titre").addEventListener("blur", () => enregistrerNote(true));
+$("note-texte").addEventListener("blur", () => enregistrerNote(true));
+$("note-retour").addEventListener("click", () => montrer({ type: "notes" }));
+$("note-supprimer").addEventListener("click", () => { $("note-confirme").hidden = false; $("note-non").focus(); });
+$("note-non").addEventListener("click", () => { $("note-confirme").hidden = true; });
+$("note-oui").addEventListener("click", () => {
+  const id = VUE && VUE.id; if (!id) return;
+  clearTimeout(minuteurNote); NOTE_SALE = false; $("note-confirme").hidden = true;
+  GROUPES = GROUPES.filter((g) => g.id !== id);
+  deleteDoc(refGroupe(id)).catch(erreur);
+  montrer({ type: "notes" });
+});
+$("note-archiver").addEventListener("click", () => { enregistrerNote(true); archiverGroupe(VUE.id, true); montrer({ type: "notes" }); });
+window.addEventListener("pagehide", () => enregistrerNote(true));
+document.addEventListener("visibilitychange", () => { if (document.hidden) enregistrerNote(true); });
+
+/* ---------- affichage ---------- */
+function bouton(cls, texte, titre, action) {
+  const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = texte; b.title = titre; b.setAttribute("aria-label", titre);
+  b.addEventListener("click", action); return b;
+}
+function ligne(a, deplacable) {
+  const li = document.createElement("li"); li.className = "art" + (a.coche ? " coche" : "") + (a.titre ? " titre" : ""); li.dataset.id = a.id;
+  const elts = [];
+  if (!a.titre) {
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = a.coche; cb.setAttribute("aria-label", (a.coche ? "Décocher " : "Cocher ") + a.texte);
+    cb.addEventListener("change", () => cocher(a.id, cb.checked)); elts.push(cb);
+  }
+  const t = document.createElement("input"); t.className = "txt"; t.value = a.texte; t.id = "txt-" + a.id; t.setAttribute("aria-label", a.titre ? "Magasin" : "Article");
+  t.addEventListener("keydown", (e) => { if (e.key !== "Enter") return; e.preventDefault(); if (deplacable) ouvrirInsertion(a.ordre); else t.blur(); });
+  if (deplacable) t.setAttribute("enterkeyhint", "next");
+  t.addEventListener("change", () => renommer(a.id, t.value)); elts.push(t);
+  if (deplacable) {                                 // poignée ⠿ à droite, avant la croix
+    const h = document.createElement("span"); h.className = "poignee"; h.textContent = "⠿"; h.title = "Glisser pour déplacer"; h.setAttribute("aria-hidden", "true");
+    h.addEventListener("pointerdown", (e) => debutGlisse(e, li)); elts.push(h);
+  }
+  elts.push(bouton("suppr", "×", "Supprimer " + a.texte, () => supprimer(a.id)));
+  li.append(...elts); return li;
+}
+const enListe = () => ARTS.filter((a) => !a.coche).sort((a, b) => a.ordre - b.ordre);
+function rendre() {
+  const el = document.activeElement, actif = el && (el.classList.contains("txt") || el.id === "insert-txt") ? el.id : null;
+  const valInsert = $("insert-txt") ? $("insert-txt").value : "";
+  const aFaire = enListe();
+  const faits = ARTS.filter((a) => a.coche && !a.titre).sort((a, b) => b.cocheLe - a.cocheLe);
+  $("liste").replaceChildren(...aFaire.map((a) => ligne(a, true)));
+  $("coches").replaceChildren(...faits.map((a) => ligne(a, false)));
+  if (INSERT) poserInsertion(aFaire, valInsert);
+  $("vide").hidden = aFaire.some((a) => !a.titre);
+  $("bascule").hidden = !faits.length;
+  $("nb-coches").textContent = faits.length + " élément" + (faits.length > 1 ? "s" : "") + " coché" + (faits.length > 1 ? "s" : "");
+  $("bascule").setAttribute("aria-expanded", String(ouvert && faits.length > 0)); $("zone-coches").hidden = !(ouvert && faits.length);
+  if (actif && $(actif)) { const f = $(actif); f.focus(); if (actif === "insert-txt") { const n = f.value.length; try { f.setSelectionRange(n, n); } catch (e) { /* sans gravité */ } } }
+  suggerer();
+}
+
+/* ---------- suggestions : articles déjà achetés, les plus fréquents d'abord ---------- */
+function suggerer() {
+  const q = norm($("nouveau").value), deja = {};
+  ARTS.forEach((a) => { if (!a.coche && !a.titre) deja[cle(a.texte)] = 1; });
+  const l = Object.keys(HISTO).map((k) => ({ k, t: HISTO[k].t, n: HISTO[k].n || 1 }))
+    .filter((h) => !deja[h.k] && q && norm(h.t).indexOf(q) >= 0 && norm(h.t) !== q)
+    .sort((a, b) => {
+      const pa = norm(a.t).indexOf(q) === 0 ? 0 : 1, pb = norm(b.t).indexOf(q) === 0 ? 0 : 1;
+      return pa - pb || b.n - a.n || (norm(a.t) < norm(b.t) ? -1 : 1);
+    }).slice(0, 8);
+  $("sugg").replaceChildren(...l.map((h) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = h.t; b.title = "Acheté " + h.n + " fois";
+    const s = document.createElement("small"); s.textContent = "×" + h.n; b.appendChild(s);
+    b.addEventListener("click", () => ajouter(h.t)); return b;
+  }));
+}
+
+/* ---------- écritures ---------- */
+function memoriser(texte) {
+  const k = cle(texte), n = ((HISTO[k] && HISTO[k].n) || 0) + 1;
+  HISTO[k] = { t: texte.trim(), n };
+  return setDoc(refHisto(), { termes: { [k]: { t: texte.trim(), n } } }, { merge: true });
+}
+function ajouter(texte, ordre, depuisInsertion) {
+  texte = String(texte || "").trim(); if (!texte || !UID || !G) return Promise.resolve();
+  if (!depuisInsertion) { $("nouveau").value = ""; suggerer(); $("nouveau").focus(); }
+  const exist = ARTS.find((a) => !a.titre && cle(a.texte) === cle(texte));
+  // déjà dans la liste cochée : on le remet à acheter au lieu de créer un doublon
+  const p = exist ? (exist.coche ? updateDoc(refArticle(exist.id), { coche: false }) : Promise.resolve())
+                  : addDoc(colArticles(), { texte, coche: false, ordre: ordre || Date.now() });
+  return p.then(() => memoriser(texte)).catch(erreur);
+}
+
+/* ---------- collage de plusieurs lignes (ex. ingrédients copiés depuis ASSPER) ---------- */
+const UNITES = "kg|g|gr|grammes?|mg|l|litres?|cl|dl|ml|c\\.?\\s?à\\s?(?:soupe|café|s|c)\\.?|cuill(?:è|e)res?\\s+à\\s+(?:soupe|café)|cs|cc|tasses?|verres?|pincées?|brins?|branches?|bottes?|gousses?|tranches?|feuilles?|morceaux?|boîtes?|sachets?|pots?|paquets?|noix(?=\\s+de\\s+beurre)|filets?|zestes?|poignées?|bouquets?|briques?|bouteilles?";
+const RE_QTE = new RegExp("^(?:environ\\s+|quelques\\s+)?[\\d\\s.,/½¼¾⅓⅔-]*[\\d½¼¾⅓⅔][\\d\\s.,/½¼¾⅓⅔]*\\s*(?:(?:" + UNITES + ")(?=[\\s.']|$)\\.?)?\\s*", "i");
+// « 200 g de beurre » → « Beurre » ; « 4 osso bucco (1,2 kg) » → « Osso bucco »
+function produit(ligne) {
+  let s = String(ligne || "").replace(/^\s*[-•*·–—]\s*/, "").replace(/^\d+[.)]\s+(?=\D)/, "").replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+  s = s.replace(RE_QTE, "").replace(/^(?:de\s+la\s+|de\s+l['’]\s*|de\s+|d['’]\s*|des\s+|du\s+)/i, "").replace(/[.;]+$/, "").trim();
+  if (s.length > 2 && s === s.toUpperCase()) s = s.toLowerCase();       // « OSSO BUCCO » → « osso bucco »
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+}
+async function ajouterPlusieurs(lignes, ici) {
+  const vus = new Set(), liste = [];
+  lignes.forEach((l) => {
+    if (/^\s*ingr[ée]dients?\b/i.test(l) || /:\s*$/.test(l)) return;   // titres
+    const p = produit(l); if (p.length < 2 || vus.has(cle(p))) return;
+    vus.add(cle(p)); liste.push(p);
+  });
+  if (!liste.length) return;
+  etat("Ajout de " + liste.length + " article" + (liste.length > 1 ? "s" : "") + "…");
+  if (ici) {                                   // collé dans la ligne d'insertion : on range les articles à cet endroit
+    const bas = INSERT.ordre, suiv = enListe().find((a) => a.ordre > bas), haut = suiv ? suiv.ordre : bas + 1000 * (liste.length + 1);
+    for (let i = 0; i < liste.length; i++) { const o = bas + (haut - bas) * (i + 1) / (liste.length + 1); await ajouter(liste[i], o, true); INSERT.ordre = o; }
+    rendre(); return;
+  }
+  const base = Date.now();
+  for (let i = 0; i < liste.length; i++) await ajouter(liste[i], base + i);   // un à la fois, dans l'ordre
+}
+
+/* ---------- insérer un article juste sous un autre (touche Entrée) ---------- */
+let INSERT = null;   // { ordre } : la ligne d'insertion se place sous le dernier élément d'ordre <= INSERT.ordre
+function ouvrirInsertion(ordre) { INSERT = { ordre }; rendre(); const t = $("insert-txt"); if (t) t.focus(); }
+function fermerInsertion() { if (!INSERT) return; INSERT = null; const r = $("insert-ligne"); if (r) r.remove(); }
+function poserInsertion(aFaire, valeur) {
+  const li = document.createElement("li"); li.className = "art insertion"; li.id = "insert-ligne";
+  const plus = document.createElement("span"); plus.className = "plus-petit"; plus.textContent = "+"; plus.setAttribute("aria-hidden", "true");
+  const t = document.createElement("input"); t.id = "insert-txt"; t.className = "txt-insert"; t.placeholder = "Nouvel article ici"; t.value = valeur || "";
+  t.setAttribute("aria-label", "Nouvel article à cet endroit"); t.setAttribute("enterkeyhint", "next"); t.autocomplete = "off";
+  t.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { fermerInsertion(); return; }
+    if (e.key !== "Enter") return;
+    e.preventDefault(); validerInsertion(false);
+  });
+  t.addEventListener("blur", () => setTimeout(() => { if (INSERT && document.activeElement !== $("insert-txt")) validerInsertion(true); }, 120));
+  t.addEventListener("paste", (e) => {
+    const lignes = ((e.clipboardData || window.clipboardData).getData("text") || "").replace(/\r/g, "").split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lignes.length < 2) return; e.preventDefault(); ajouterPlusieurs(lignes, true);
+  });
+  li.append(plus, t);
+  const lis = [...$("liste").children], apres = aFaire.filter((a) => a.ordre <= INSERT.ordre).pop();
+  const ref = apres ? lis.find((x) => x.dataset.id === apres.id) : null;
+  if (ref) ref.after(li); else $("liste").prepend(li);
+}
+function validerInsertion(etFermer) {
+  if (!INSERT) return;
+  const t = $("insert-txt"), texte = t ? t.value.trim() : "";
+  if (!texte) { fermerInsertion(); return; }
+  const bas = INSERT.ordre, suiv = enListe().find((a) => a.ordre > bas), o = suiv ? (bas + suiv.ordre) / 2 : bas + 1000;
+  const dejaLa = ARTS.some((a) => !a.titre && cle(a.texte) === cle(texte));
+  t.value = "";
+  ajouter(texte, o, true);
+  if (etFermer) { fermerInsertion(); return; }
+  if (!dejaLa) INSERT.ordre = o;   // la ligne suivante s'ouvre sous l'article qu'on vient d'ajouter
+  rendre(); const n = $("insert-txt"); if (n) n.focus();
+}
+function cocher(id, val) { updateDoc(refArticle(id), val ? { coche: true, cocheLe: Date.now() } : { coche: false }).catch(erreur); }
+function ajouterTitre() {
+  if (!UID || !G) return;
+  const texte = $("nouveau").value.trim() || "Magasin";
+  $("nouveau").value = ""; suggerer();
+  const r = doc(colArticles());   // identifiant connu tout de suite : le focus marche aussi hors ligne
+  setDoc(r, { texte, type: "titre", coche: false, ordre: Date.now() }).catch(erreur);
+  setTimeout(() => { const t = $("txt-" + r.id); if (t) { t.focus(); t.select(); } }, 150);
+}
+/* ---------- déplacer : glisser avec la poignée ⠿ ---------- */
+// groupe = un magasin et ses articles (jusqu'au magasin suivant) ; un article seul = groupe d'un élément
+function groupeDe(id, liste) {
+  const i = liste.findIndex((a) => a.id === id); if (i < 0) return [];
+  if (!liste[i].titre) return [id];
+  const g = [id];
+  for (let k = i + 1; k < liste.length && !liste[k].titre; k++) g.push(liste[k].id);
+  return g;
+}
+function placer(groupe, ids) {   // ids = ordre voulu de la liste, après déplacement ; groupe = éléments déplacés (consécutifs)
+  const l = enListe(), parId = Object.fromEntries(l.map((a) => [a.id, a]));
+  const i0 = ids.indexOf(groupe[0]), i1 = ids.indexOf(groupe[groupe.length - 1]);
+  const avant = parId[ids[i0 - 1]], apres = parId[ids[i1 + 1]], n = groupe.length;
+  const bas = avant ? avant.ordre : (apres ? apres.ordre - 1000 * (n + 1) : Date.now());
+  const haut = apres ? apres.ordre : bas + 1000 * (n + 1);
+  const maj = [];
+  groupe.forEach((id, k) => {
+    const o = bas + (haut - bas) * (k + 1) / (n + 1), x = parId[id];
+    if (x && x.ordre !== o) { x.ordre = o; maj.push([id, o]); }
+  });
+  if (!maj.length) return;
+  rendre();                     // affichage immédiat
+  maj.forEach(([id, o]) => updateDoc(refArticle(id), { ordre: o }).catch(erreur));
+}
+function debutGlisse(e, li) {
+  if (e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  const ul = li.parentNode, groupe = groupeDe(li.dataset.id, enListe());
+  const lis = groupe.map((id) => ul.querySelector('li[data-id="' + id + '"]')).filter(Boolean);
+  const estTitre = li.classList.contains("titre");
+  glisse = { ul };
+  lis.forEach((x) => x.classList.add("glisse")); document.body.classList.add("en-glisse");
+  const bouge = (ev) => {
+    const y = ev.clientY;
+    if (y < 70) window.scrollBy(0, -12); else if (y > window.innerHeight - 70) window.scrollBy(0, 12);
+    // un magasin ne se pose que devant un autre magasin ou en fin de liste (pour ne pas couper un groupe)
+    const autres = [...ul.children].filter((x) => !lis.includes(x) && (!estTitre || x.classList.contains("titre")));
+    const cible = autres.find((x) => { const r = x.getBoundingClientRect(); return y < r.top + r.height / 2; });
+    const dernier = lis[lis.length - 1];
+    if (cible) { if (dernier.nextSibling !== cible) lis.forEach((x) => ul.insertBefore(x, cible)); }
+    else if (ul.lastChild !== dernier) lis.forEach((x) => ul.appendChild(x));
+  };
+  const fin = () => {
+    window.removeEventListener("pointermove", bouge); window.removeEventListener("pointerup", fin); window.removeEventListener("pointercancel", fin);
+    lis.forEach((x) => x.classList.remove("glisse")); document.body.classList.remove("en-glisse");
+    const ids = [...ul.children].map((x) => x.dataset.id);
+    glisse = null;
+    placer(groupe, ids);
+    if (aRendre) { aRendre = false; rendre(); }
+  };
+  window.addEventListener("pointermove", bouge); window.addEventListener("pointerup", fin); window.addEventListener("pointercancel", fin);
+}
+function renommer(id, texte) {
+  texte = texte.trim();
+  if (!texte) { supprimer(id); return; }
+  const a = ARTS.find((x) => x.id === id);
+  updateDoc(refArticle(id), { texte }).then(() => (a && a.titre) ? null : memoriser(texte)).catch(erreur);
+}
+function supprimer(id) { deleteDoc(refArticle(id)).catch(erreur); }
+
+/* ---------- événements ---------- */
+$("form-ajout").addEventListener("submit", (e) => { e.preventDefault(); ajouter($("nouveau").value); });
+$("nouveau").addEventListener("input", suggerer);
+$("ajout-titre").addEventListener("click", ajouterTitre);
+$("nouveau").addEventListener("paste", (e) => {
+  const t = (e.clipboardData || window.clipboardData).getData("text") || "";
+  const lignes = t.replace(/\r/g, "").split("\n").map((l) => l.trim()).filter(Boolean);
+  if (lignes.length < 2) return;            // une seule ligne : collage normal dans le champ
+  e.preventDefault(); ajouterPlusieurs(lignes);
+});
+$("bascule").addEventListener("click", () => { ouvert = !ouvert; try { localStorage.setItem("ma-liste_coches_ouvert", ouvert ? "1" : "0"); } catch (e) { /* sans gravité */ } rendre(); });
+$("vider").addEventListener("click", () => {
+  const ids = ARTS.filter((a) => a.coche).map((a) => a.id); if (!ids.length) return;
+  const c = $("confirme"); c.replaceChildren();
+  const box = document.createElement("div"); box.className = "confirme";
+  const s = document.createElement("span"); s.textContent = "Supprimer les " + ids.length + " éléments cochés ? Ils resteront proposés en suggestion.";
+  const non = document.createElement("button"); non.className = "non"; non.type = "button"; non.textContent = "Annuler"; non.onclick = () => c.replaceChildren();
+  const oui = document.createElement("button"); oui.className = "oui"; oui.type = "button"; oui.textContent = "Supprimer";
+  oui.onclick = () => { c.replaceChildren(); Promise.all(ids.map((id) => deleteDoc(refArticle(id)))).catch(erreur); };
+  box.append(s, non, oui); c.appendChild(box);
+});
+/* ---------- sauvegarde JSON (même principe qu'ASSPER) ---------- */
+const KEY_DERNIERE = "ma-liste_derniere_sauvegarde";
+const p2 = (n) => String(n).padStart(2, "0");
+function horodatage() { const d = new Date(); return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + "_" + p2(d.getHours()) + "h" + p2(d.getMinutes()); }
+const pl = (n, mot) => n + " " + mot + (n > 1 ? "s" : "");
+function msgSauv(t, alerte) { const m = $("sauv-msg"); m.textContent = t || ""; m.classList.toggle("alerte", !!alerte); }
+function avecDelai(p, ms, quoi) { return Promise.race([p, new Promise((ok, ko) => setTimeout(() => ko(new Error(quoi + " : le réseau ne répond pas")), ms))]); }
+function telecharger(nom, contenu) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([contenu], { type: "application/json" })); a.download = nom;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+/* dossier de sauvegarde : File System Access API (Chrome, Edge), mémorisé dans IndexedDB ; sinon téléchargement */
+const fsDispo = () => typeof window.showDirectoryPicker === "function";
+function fsBase() { return new Promise((ok, ko) => { const r = indexedDB.open("ma-liste_fs", 1); r.onupgradeneeded = () => r.result.createObjectStore("h"); r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); }); }
+function fsGet() { return fsBase().then((db) => new Promise((ok) => { const q = db.transaction("h").objectStore("h").get("dossier"); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); })).catch(() => null); }
+function fsSet(h) { return fsBase().then((db) => new Promise((ok, ko) => { const t = db.transaction("h", "readwrite"); if (h) t.objectStore("h").put(h, "dossier"); else t.objectStore("h").delete("dossier"); t.oncomplete = ok; t.onerror = () => ko(t.error); })); }
+// à appeler tout de suite après le clic (le navigateur n'accepte de demander l'autorisation que juste après un clic)
+async function preparerDossier() {
+  if (!fsDispo()) return { h: null, err: "" };
+  try {
+    const h = await fsGet(); if (!h) return { h: null, err: "" };
+    const opt = { mode: "readwrite" };
+    let pe = await h.queryPermission(opt); if (pe !== "granted") pe = await h.requestPermission(opt);
+    return pe === "granted" ? { h, err: "" } : { h: null, err: "accès au dossier refusé" };
+  } catch (e) { return { h: null, err: (e && e.message) || "erreur inconnue" }; }
+}
+async function ecrireFichier(dos, nom, txt) {
+  if (dos.h) {
+    try { const w = await (await dos.h.getFileHandle(nom, { create: true })).createWritable(); await w.write(txt); await w.close(); return "dossier « " + dos.h.name + " »"; }
+    catch (e) { dos.err = (e && e.message) || "erreur inconnue"; }
+  }
+  telecharger(nom, txt);
+  return dos.err ? "Téléchargements (dossier inaccessible : " + dos.err + ")" : "Téléchargements";
+}
+// lit toutes les données sur le serveur
+async function lireTout() {
+  const gs = await avecDelai(getDocs(colGroupes()), 20000, "Lecture des listes");
+  const groupes = [];
+  for (const d of gs.docs) {
+    const data = d.data(), g = { id: d.id, legacy: !!data.legacy }, o = { id: d.id, data };
+    if (data.type !== "note") {
+      const a = await avecDelai(getDocs(colArticlesDe(g)), 20000, "Lecture des articles");
+      o.articles = a.docs.map((x) => ({ id: x.id, data: x.data() }));
+      const h = await avecDelai(getDoc(refHistoDe(g)), 20000, "Lecture des suggestions");
+      o.historique = h.exists() ? h.data() : null;
+    }
+    groupes.push(o);
+  }
+  return { application: "MA LISTE", format: 1, version: VERSION, exporteLe: new Date().toISOString(), groupes };
+}
+function compter(o) {
+  const l = o.groupes.filter((g) => g.data.type !== "note"), n = o.groupes.filter((g) => g.data.type === "note");
+  const art = l.reduce((t, g) => t + (g.articles || []).filter((a) => a.data.type !== "titre").length, 0);
+  const arch = o.groupes.filter((g) => g.data.archive).length;
+  return pl(l.length, "liste") + " (" + pl(art, "article") + "), " + pl(n.length, "note") + (arch ? ", dont " + arch + " aux archives" : "");
+}
+async function sauvegarder(dos, prefixe) {
+  const n0 = nbModifs();
+  const obj = await lireTout(), nom = prefixe + horodatage() + ".json";
+  const ou = await ecrireFichier(dos, nom, JSON.stringify(obj, null, 1));
+  try { localStorage.setItem(KEY_DERNIERE, new Date().toISOString()); } catch (e) { /* sans gravité */ }
+  fixerModifs(nbModifs() - n0);
+  return { obj, nom, ou };
+}
+function rendreSauvegarde() {
+  const l = GROUPES.filter((g) => g.type === "liste"), n = GROUPES.filter((g) => g.type === "note"), a = archives().length;
+  $("sauv-contenu").textContent = pl(l.length, "liste") + ", " + pl(n.length, "note") + (a ? ", dont " + a + " aux archives" : "") + ".";
+  let d = null; try { d = localStorage.getItem(KEY_DERNIERE); } catch (e) { d = null; }
+  const m = nbModifs();
+  $("sauv-derniere").textContent = (d ? new Date(d).toLocaleString("fr-FR") : "jamais") + (m ? " — " + pl(m, "modification") + " depuis" : "");
+  $("fs-choisir").hidden = !fsDispo();
+  $("fs-aide").textContent = fsDispo() ? "Choisis une fois le dossier (par exemple « COURSES JSON ») : chaque sauvegarde y sera enregistrée directement. Le navigateur peut redemander l'autorisation : accepte." : "Ce navigateur ne permet pas de choisir un dossier : la sauvegarde va dans « Téléchargements ».";
+  fsGet().then((h) => { $("fs-nom").textContent = h ? "« " + h.name + " »" : "aucun (le fichier va dans « Téléchargements »)"; $("fs-oublier").hidden = !h; });
+}
+let SAUV_EN_COURS = false;
+async function sauvegarderMaintenant(afficher) {
+  if (SAUV_EN_COURS) return; SAUV_EN_COURS = true; $("sauv-go").disabled = true; $("btn-sauv").disabled = true;
+  afficher("Sauvegarde en cours…");
+  try { const dos = await preparerDossier(), r = await sauvegarder(dos, "MA-LISTE_sauvegarde_"); afficher("Sauvegarde enregistrée : " + r.nom + " → " + r.ou + ". " + compter(r.obj) + "."); }
+  catch (e) { afficher("Sauvegarde impossible : " + e.message + ".", true); }
+  SAUV_EN_COURS = false; $("sauv-go").disabled = false; $("btn-sauv").disabled = false;
+  if (VUE && VUE.type === "sauvegarde") rendreSauvegarde();
+}
+let minuteurToast = null;
+function toast(t, alerte) {
+  const e = $("toast"); e.textContent = t; e.classList.toggle("alerte", !!alerte); e.hidden = false;
+  clearTimeout(minuteurToast); minuteurToast = setTimeout(() => { e.hidden = true; }, alerte ? 7000 : 4000);
+}
+function majBoutonSauv() {
+  const n = nbModifs(), b = document.getElementById("btn-sauv"), pa = document.getElementById("pastille-sauv"); if (!b) return;
+  pa.hidden = !n; pa.textContent = n > 99 ? "99+" : String(n);
+  const t = n ? "Sauvegarder (" + pl(n, "modification") + " non sauvegardée" + (n > 1 ? "s" : "") + ")" : "Sauvegarder (rien de nouveau)";
+  b.title = t; b.setAttribute("aria-label", t);
+}
+$("sauv-go").addEventListener("click", () => sauvegarderMaintenant(msgSauv));
+$("btn-sauv").addEventListener("click", () => sauvegarderMaintenant(toast));
+majBoutonSauv();
+// alerte du navigateur si on ferme avec des modifications non sauvegardées (texte imposé par le navigateur)
+window.addEventListener("beforeunload", (e) => { if (nbModifs() > 0) { e.preventDefault(); e.returnValue = true; } });
+$("fs-choisir").addEventListener("click", () => {
+  window.showDirectoryPicker({ id: "ma-liste-sauvegardes", mode: "readwrite" })
+    .then((h) => fsSet(h).then(() => { msgSauv("Dossier de sauvegarde : « " + h.name + " »"); rendreSauvegarde(); }))
+    .catch((e) => { if (e && e.name !== "AbortError") msgSauv("Dossier non retenu : " + e.message, true); });
+});
+$("fs-oublier").addEventListener("click", () => { fsSet(null).then(() => { msgSauv("Dossier retiré : les sauvegardes iront dans « Téléchargements »."); rendreSauvegarde(); }); });
+
+/* restauration : remplace tout, après une sauvegarde automatique de l'état actuel */
+const idOk = (x) => typeof x === "string" && x.length > 0 && x.length <= 700 && !x.includes("/") && x !== "." && x !== ".." && !/^__.*__$/.test(x);
+const objet = (x) => !!x && typeof x === "object" && !Array.isArray(x);
+function validerSauvegarde(o) {
+  if (!objet(o) || !["MA LISTE", "COURSES DEMO"].includes(o.application) || !Array.isArray(o.groupes)) throw new Error("ce fichier n'est pas une sauvegarde Ma Liste");
+  const vus = new Set();
+  o.groupes.forEach((g) => {
+    if (!objet(g) || !idOk(g.id) || !objet(g.data) || vus.has(g.id)) throw new Error("liste ou note mal formée dans le fichier");
+    vus.add(g.id);
+    if (g.articles !== undefined && (!Array.isArray(g.articles) || g.articles.some((a) => !objet(a) || !idOk(a.id) || !objet(a.data)))) throw new Error("article mal formé dans « " + (g.data.nom || g.id) + " »");
+    if (g.historique != null && !objet(g.historique)) throw new Error("suggestions mal formées dans « " + (g.data.nom || g.id) + " »");
+  });
+  return o;
+}
+// liste de toutes les écritures qui décrivent une sauvegarde : [ référence, données ]
+function ecritures(o) {
+  const l = [];
+  o.groupes.forEach((x) => {
+    const g = { id: x.id, legacy: !!x.data.legacy };
+    l.push([refGroupe(x.id), x.data]);
+    (x.articles || []).forEach((a) => l.push([doc(colArticlesDe(g), a.id), a.data]));
+    if (x.historique) l.push([refHistoDe(g), x.historique]);
+  });
+  return l;
+}
+let A_RESTAURER = null;
+$("rest-choisir").addEventListener("click", () => { $("rest-confirme").hidden = true; A_RESTAURER = null; $("file-json").click(); });
+$("file-json").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ""; if (!f) return;
+  f.text().then((t) => {
+    let o; try { o = validerSauvegarde(JSON.parse(t)); } catch (err) { msgSauv("Restauration impossible : " + err.message + ".", true); return; }
+    A_RESTAURER = o;
+    const date = o.exporteLe ? new Date(o.exporteLe).toLocaleString("fr-FR") : "date inconnue";
+    $("rest-txt").textContent = "Restaurer « " + f.name + " » (" + date + ") : " + compter(o) + " ? Toutes les données actuelles seront remplacées.";
+    $("rest-confirme").hidden = false; msgSauv(""); $("rest-non").focus();
+  }).catch(() => msgSauv("Lecture du fichier impossible.", true));
+});
+$("rest-non").addEventListener("click", () => { $("rest-confirme").hidden = true; A_RESTAURER = null; });
+$("rest-oui").addEventListener("click", async () => {
+  const o = A_RESTAURER; if (!o) return;
+  $("rest-confirme").hidden = true; A_RESTAURER = null;
+  const btn = $("rest-choisir"); btn.disabled = true;
+  try {
+    msgSauv("Sauvegarde de l'état actuel…");
+    const avant = await sauvegarder(await preparerDossier(), "MA-LISTE_avant_restauration_");
+    msgSauv("Restauration en cours…");
+    const nouv = ecritures(o), garder = new Set(nouv.map(([r]) => r.path));
+    const ops = ecritures(avant.obj).filter(([r]) => !garder.has(r.path)).map(([r]) => [r, null]).concat(nouv);
+    for (let i = 0; i < ops.length; i += 400) {           // au plus 500 écritures par lot (limite Firestore)
+      const b = writeBatch(db);
+      ops.slice(i, i + 400).forEach(([r, d]) => { if (d) b.set(r, d); else b.delete(r); });
+      await avecDelai(b.commit(), 30000, "Enregistrement");
+    }
+    fixerModifs(0);   // les données sont maintenant celles du fichier
+    msgSauv("Sauvegarde restaurée : " + compter(o) + ". L'état d'avant est dans " + avant.nom + " (" + avant.ou + ").");
+    rendreSauvegarde(); rendreTiroir();
+  } catch (e) { msgSauv("Restauration interrompue : " + e.message + ". Si une partie a été remplacée, restaure le fichier « MA-LISTE_avant_restauration_… ».", true); }
+  btn.disabled = false;
+});
+
+/* ---------- ouverture sans réseau : l'appli est gardée sur l'appareil (service worker) ---------- */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("sw.js").catch((e) => console.warn("Mode hors ligne indisponible :", e));
+}
+</script>
+</body>
+</html>

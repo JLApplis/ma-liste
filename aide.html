@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma Liste — Aide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap">
+<!--
+  Aide — Ma Liste
+  Copyright (C) 2026 Jluc — JLApplis — Licence GPL v3
+-->
+<style>
+:root {
+  --bg: #FBF6EC; --surface: #FFFFFF; --fg: #2B2A24; --muted: #6B6455; --line: #EAE1CF;
+  --leaf: #2E7D4F; --leaf-soft: #E6F2E8; --tomato: #E1543A; --jaune: #FFF3CD; --jaune-fg: #664D03;
+  --font: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --display: "Fredoka", "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--font); }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; margin: 0; }
+a { color: var(--leaf); font-weight: 600; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+header.hero { background: var(--leaf); color: #fff; padding: 26px 0; }
+header.hero .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+header.hero h1 { font-size: 28px; }
+header.hero .sous { opacity: .9; font-size: 15px; margin-top: 2px; }
+.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 20px; padding: 7px 14px; font: 600 14px var(--font); white-space: nowrap; }
+button.badge { cursor: pointer; }
+nav.sommaire { background: var(--surface); border-bottom: 1px solid var(--line); }
+nav.sommaire .wrap { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 10px; padding-bottom: 10px; font-size: 14px; }
+nav.sommaire a { text-decoration: none; }
+main { padding: 18px 0 30px; }
+section.mod { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; break-inside: avoid; }
+.etiquette { font: 700 12px var(--font); letter-spacing: .06em; color: var(--tomato); text-transform: uppercase; }
+section.mod h2 { font-size: 22px; color: var(--leaf); margin-top: 2px; }
+.duree { float: right; font-size: 13px; color: var(--muted); }
+section.mod p { margin: 8px 0; }
+section.mod ul, section.mod ol { margin: 8px 0; padding-left: 22px; }
+section.mod li { margin: 4px 0; }
+.essai { background: var(--leaf-soft); border-left: 4px solid var(--leaf); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+.essai b:first-child { color: var(--leaf); }
+.attention { background: var(--jaune); color: var(--jaune-fg); border-left: 4px solid #FFDA6A; border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+kbd, .ic { display: inline-block; min-width: 1.6em; text-align: center; background: #F4EFE3; border: 1px solid var(--line); border-radius: 6px; padding: 0 5px; font: 600 14px var(--font); }
+table { border-collapse: collapse; margin: 8px 0; font-size: 15px; }
+td, th { border: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+th { background: #F4EFE3; }
+dl.faq dt { font-weight: 700; margin-top: 10px; }
+dl.faq dd { margin: 2px 0 0 0; }
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 0 26px; }
+@media (max-width: 600px) { header.hero h1 { font-size: 23px; } .duree { float: none; display: block; } }
+@media print {
+  @page { size: A4; margin: 10mm; }
+  body { background: #fff; font-size: 11px; line-height: 1.4; }
+  .wrap { max-width: none; padding: 0; }
+  header.hero { padding: 8px 12px; border-radius: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header.hero h1 { font-size: 19px; }
+  header.hero .sous, .badge { font-size: 11px; }
+  nav.sommaire, button.badge { display: none; }
+  main { padding: 4px 0 0; column-count: 2; column-gap: 8px; }
+  section.mod { display: inline-block; width: 100%; border-color: #ccc; border-radius: 10px; padding: 6px 9px; margin: 0 0 7px; }
+  section.mod h2 { font-size: 14px; }
+  section.mod p, section.mod ul, section.mod ol { margin: 4px 0; }
+  section.mod ul, section.mod ol { padding-left: 16px; }
+  section.mod li { margin: 2px 0; }
+  .etiquette { font-size: 9px; }
+  .duree { font-size: 10px; }
+  .essai, .attention { padding: 5px 8px; margin-top: 5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  kbd, .ic { font-size: 10px; }
+  table { font-size: 10px; margin: 4px 0; }
+  td, th { padding: 2px 6px; }
+  dl.faq dt { margin-top: 4px; }
+  footer { padding: 4px 0 0; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div><h1>Ma Liste — Aide</h1><div class="sous">La liste de courses à cocher, sans compte, enregistrée dans votre navigateur</div></div>
+  <div class="badges"><a class="badge" href="./" style="text-decoration:none">🛒 Ouvrir Ma Liste</a><button class="badge" type="button" onclick="window.print()">🖨️ Imprimer</button></div>
+</div></header>
+
+<nav class="sommaire" aria-label="Sommaire"><div class="wrap">
+  <a href="#demarrer">Démarrer</a><a href="#liste">La liste</a><a href="#suggestions">Suggestions</a><a href="#coller">Coller une liste</a>
+  <a href="#magasins">Magasins</a><a href="#menu">Listes, notes, archives</a><a href="#sauvegarde">Sauvegarde</a><a href="#telephone">Sur le téléphone</a><a href="#donnees">Vos données</a><a href="#faq">FAQ</a>
+</div></nav>
+
+<main class="wrap">
+
+<section class="mod" id="objectifs">
+  <div class="etiquette">🎯 En bref</div>
+  <h2>Ce que fait Ma Liste</h2>
+  <ul>
+    <li>Tenir une liste de courses : ajouter, cocher, supprimer, retrouver ce qu'on achète souvent</li>
+    <li>Ranger la liste par magasin et changer l'ordre des articles</li>
+    <li>Avoir plusieurs listes et des notes, les archiver et les retrouver</li>
+    <li>Sauvegarder ses données dans un fichier, les restaurer et changer d'appareil</li>
+  </ul>
+</section>
+
+<section class="mod" id="demarrer">
+  <div class="etiquette">1 · Démarrer</div>
+  <h2>Rien à installer, aucun compte</h2>
+  <p>Ouvrez <a href="./">Ma Liste</a> (<b>https://jlapplis.github.io/ma-liste/</b>) : la « Liste de courses » est prête, vide. Il n'y a ni compte ni mot de passe.</p>
+  <div class="attention"><b>Important :</b> vos listes sont enregistrées <b>uniquement dans ce navigateur, sur cet appareil</b>. Rien n'est envoyé sur Internet. Si les données du navigateur sont effacées, les listes sont perdues : faites régulièrement une sauvegarde (bouton 💾).</div>
+</section>
+
+<section class="mod" id="liste">
+  <div class="etiquette">2 · La liste</div>
+  <h2>Ajouter, cocher, supprimer</h2>
+  <ul>
+    <li><b>Ajouter</b> : taper l'article dans le champ « Ajouter un article ou coller une liste » en bas, puis <kbd>Entrée</kbd>.</li>
+    <li><b>Cocher</b> : la case à gauche. L'article descend dans la zone repliable « X éléments cochés ».</li>
+    <li><b>Décocher</b> : ouvrir cette zone et décocher ; l'article revient à sa place dans la liste.</li>
+    <li><b>Supprimer</b> un article : la croix <span class="ic">×</span> à droite. Pour vider les achats faits : <b>Supprimer les éléments cochés</b> (avec confirmation).</li>
+    <li><b>Corriger</b> un article : cliquer sur son texte et le modifier.</li>
+    <li><b>Insérer</b> un article à un endroit précis : cliquer sur l'article du dessus et appuyer sur <kbd>Entrée</kbd> ; une ligne s'ouvre juste dessous (<kbd>Échap</kbd> la ferme).</li>
+  </ul>
+</section>
+
+<section class="mod" id="suggestions">
+  <div class="etiquette">3 · Suggestions</div>
+  <h2>Retrouver ce qu'on achète souvent</h2>
+  <p>En tapant dans le champ du bas, l'appli propose les articles déjà achetés, <b>les plus fréquents d'abord</b> (le nombre ×n indique combien de fois). Un clic sur une suggestion l'ajoute. Si l'article est déjà dans la liste mais coché, il est simplement remis à acheter : pas de doublon. Chaque liste a ses propres suggestions.</p>
+</section>
+
+<section class="mod" id="coller">
+  <div class="etiquette">4 · Coller une liste</div>
+  <h2>Une recette devient une liste</h2>
+  <p>Coller plusieurs lignes dans le champ du bas crée un article par ligne. Les quantités et unités sont retirées : « 250 g de farine » devient « Farine ».</p>
+</section>
+
+<section class="mod" id="magasins">
+  <div class="etiquette">5 · Magasins</div>
+  <h2>Ranger par magasin, changer l'ordre</h2>
+  <ul>
+    <li><b>🏪 Ajouter un magasin</b> crée un titre (ex. « Pharmacie ») ; les articles placés dessous lui appartiennent.</li>
+    <li><b>Déplacer</b> : attraper la poignée <span class="ic">⠿</span> à droite de la ligne et glisser (à la souris ou au doigt).</li>
+    <li>Un magasin se déplace <b>avec tous ses articles</b>, et se pose devant un autre magasin.</li>
+  </ul>
+</section>
+
+<section class="mod" id="menu">
+  <div class="etiquette">6 · Le menu ☰</div>
+  <h2>Plusieurs listes, des notes, les archives</h2>
+  <ul>
+    <li><b>Listes</b> : « Liste de courses » est la liste principale ; <b>＋ Nouvelle liste</b> en crée une autre (ex. Bricolage).</li>
+    <li>Le bouton <span class="ic">⋮</span> en haut d'une liste : <b>renommer</b>, <b>archiver</b>, <b>supprimer</b> (avec confirmation). La Liste de courses ne peut être ni archivée ni supprimée.</li>
+    <li><b>Notes</b> : un titre, un texte et une couleur, enregistrés automatiquement. On peut les archiver ou les supprimer.</li>
+    <li><b>Archives</b> : listes et notes mises de côté ; on peut les <b>restaurer</b> ou les supprimer définitivement.</li>
+  </ul>
+</section>
+
+<section class="mod" id="sauvegarde">
+  <div class="etiquette">7 · Sauvegarde</div>
+  <h2>Garder une copie de ses données</h2>
+  <ul>
+    <li>Le bouton <span class="ic">💾</span> du bandeau vert sauvegarde tout en un clic dans un fichier JSON daté. Sa <b>pastille rouge</b> compte les modifications pas encore sauvegardées.</li>
+    <li>Menu <span class="ic">☰</span> ▸ <b>💾 Sauvegarde</b> : <b>📁 Choisir le dossier…</b> une fois (Chrome ou Edge sur ordinateur) pour que les sauvegardes y aillent directement ; sinon elles vont dans « Téléchargements ».</li>
+    <li><b>↩️ Restaurer</b> remplace toutes les données par celles d'un fichier, après avoir sauvegardé automatiquement l'état actuel (« …avant_restauration… »).</li>
+    <li>En fermant la page avec des modifications non sauvegardées, le navigateur demande confirmation.</li>
+  </ul>
+  <div class="attention">Les sauvegardes s'appellent « MA-LISTE_sauvegarde_… ». Une sauvegarde faite dans la démo Courses peut aussi être restaurée ici.</div>
+</section>
+
+<section class="mod" id="telephone">
+  <div class="etiquette">8 · Sur le téléphone</div>
+  <h2>L'installer et s'en servir au magasin</h2>
+  <ul>
+    <li>Sur Android, dans Chrome : ouvrir Ma Liste ▸ <span class="ic">⋮</span> ▸ <b>Installer</b> (plutôt que « Créer un raccourci »). Elle s'ouvre alors comme une application.</li>
+    <li>Une fois ouverte une première fois avec du réseau, elle s'ouvre et se modifie <b>sans réseau</b>, dans le magasin.</li>
+  </ul>
+</section>
+
+<section class="mod" id="donnees">
+  <div class="etiquette">9 · Vos données</div>
+  <h2>Un appareil, un navigateur</h2>
+  <ul>
+    <li>Chaque appareil, et chaque navigateur, a <b>sa propre</b> Ma Liste : la liste du téléphone n'apparaît pas sur l'ordinateur.</li>
+    <li><b>Changer d'appareil</b> : sauvegarder sur l'ancien (<span class="ic">💾</span>), envoyer le fichier sur le nouveau (e-mail, clé USB, Drive…), puis Menu <span class="ic">☰</span> ▸ 💾 Sauvegarde ▸ <b>↩️ Restaurer</b>.</li>
+    <li>Ce qui efface les listes : « effacer les données de navigation » (cookies et données de sites), la navigation privée, ou la désinstallation du navigateur.</li>
+  </ul>
+</section>
+
+<section class="mod" id="faq">
+  <div class="etiquette">❓ FAQ</div>
+  <h2>Questions fréquentes</h2>
+  <dl class="faq">
+    <dt>Mes listes ont disparu.</dt><dd>Les données du navigateur ont été effacées, ou vous êtes sur un autre appareil ou un autre navigateur. Restaurez votre dernière sauvegarde (Menu ☰ ▸ 💾 Sauvegarde ▸ ↩️ Restaurer).</dd>
+    <dt>Le bouton « Choisir le dossier » n'apparaît pas.</dt><dd>Votre navigateur ne le permet pas (Firefox, par exemple) : la sauvegarde va dans « Téléchargements ». Utilisez Chrome ou Edge.</dd>
+    <dt>Un article coché a disparu de la liste.</dt><dd>Il est dans la zone « X éléments cochés », sous la liste.</dd>
+    <dt>J'ai archivé une liste par erreur.</dt><dd>Menu ☰ ▸ Archives ▸ Restaurer.</dd>
+    <dt>Puis-je partager ma liste avec quelqu'un ?</dt><dd>Non : Ma Liste reste sur votre appareil. Vous pouvez seulement envoyer un fichier de sauvegarde, que l'autre personne restaure chez elle (ses données sont alors remplacées).</dd>
+  </dl>
+</section>
+
+</main>
+<footer>Ma Liste — © 2026 Jluc — JLApplis — Licence GNU GPL v3 — tirée de l'application Courses</footer>
+</body></html>
